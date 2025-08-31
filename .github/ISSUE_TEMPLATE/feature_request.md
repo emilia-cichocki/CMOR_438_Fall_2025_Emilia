@@ -8,15 +8,15 @@ assignees: <your-profile-name>
 
 ### Feature Summary
 
-What new feature, algorithm, or documentation support would you like?
+What new feature, algorithm, or documentation support would you like? Please give a brief description.
 
 ### Rationale
 
-Why is this useful? Describe a use case or research need this supports.
+Why would this feature be this useful? Please describe a use case or research need that it might support.
 
-### Implementation Ideas (Optional)
+### Implementation Idea
 
-If you have a rough idea of how it could be added, please describe it here. For example:
+If you have an idea of how this feature could be added, please describe it here. For example:
 
 - A known simplification of an algorithm
 - A new visualization library
