@@ -3,4 +3,4 @@ __all__ = [
     'add',
 ]
 
-from src.rice_ml.basic_functions import *
+from .basic_functions import *

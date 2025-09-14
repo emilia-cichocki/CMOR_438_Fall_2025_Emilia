@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ML_intro_project"
 version = "0.1.0"
 description = "An ML project for CMOR 438"
-authors = [{name = "Emilia Cichocki", email = ejc15@rice.edu"}]
+authors = [{name = "Emilia Cichocki", email = "ejc15@rice.edu"}]
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.9"
