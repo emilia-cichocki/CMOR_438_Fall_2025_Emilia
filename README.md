@@ -1,1 +1,1 @@
-# CMOR_438_Fall_2025_Emilia
+# CMOR 438 Fall 2025 - Data Science & Machine Learning
