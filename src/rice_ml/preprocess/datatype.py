@@ -22,7 +22,7 @@ import pandas as pd
 
 __all__ = [
     '_2D_numeric',
-    '_1D_numeric',
+    '_1D_vectorized',
     '_shape_match',
 ]
 
@@ -57,7 +57,7 @@ def _2D_numeric(data_array: ArrayLike, name: str = 'Data') -> np.ndarray:
 
     return array
 
-def _1D_numeric(data_vector: Optional[ArrayLike], name: str = 'Data') -> Optional[np.ndarray]:
+def _1D_vectorized(data_vector: Optional[ArrayLike], name: str = 'Data') -> Optional[np.ndarray]:
     
     # TODO: add type hints and docstrings, rename the function
 

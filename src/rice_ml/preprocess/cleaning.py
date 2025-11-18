@@ -1,6 +1,6 @@
 
 """
-    Data cleaning utilities for data sets (NumPy)
+    Data cleaning utilities for data sets (NumPy and Pandas)
 
     This module performs standard data cleaning processes (identification of missing 
     data, outliers, and duplicates) on numeric NumPy arrays, with flexible methods of

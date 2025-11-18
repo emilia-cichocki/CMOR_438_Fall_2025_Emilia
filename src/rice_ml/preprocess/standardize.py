@@ -1,6 +1,6 @@
 
 """
-    Standardization for data sets (NumPy)
+    Standardization for data sets (NumPy and Pandas)
 
     This module performs common standardization processes on data sets intended for 
     use in a variety of machine learning algorithms. It primarily uses NumPy (and converts
