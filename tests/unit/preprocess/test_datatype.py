@@ -59,6 +59,12 @@ def test_2D_numeric_empty():
     with pytest.raises(ValueError):
         _2D_numeric(test_array, 'test_array')
 
+def test_2D_numeric_nan():
+    test_array = np.array([[1, 2, np.nan], [np.nan, 4, 6]])
+    result_array = _2D_numeric(test_array, 'test_array')
+    assert isinstance(result_array, np.ndarray)
+    assert result_array.shape == (2, 3)
+
 def test_2D_numeric_type_input():
     test_array = 'test_array'
     with pytest.raises(TypeError):

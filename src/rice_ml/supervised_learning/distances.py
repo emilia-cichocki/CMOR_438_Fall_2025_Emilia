@@ -45,6 +45,9 @@ def _ensure_numeric(data_vector: ArrayLike, name: str = 'Data') -> np.ndarray:
     else:
         vector = vector.astype(float, copy = False)
 
+    if np.isnan(vector).any():
+        raise ValueError(f'{name} contains missing data (NaN values)')
+    
     return vector
 
 def euclidean_distance(data_vector_1: ArrayLike, 

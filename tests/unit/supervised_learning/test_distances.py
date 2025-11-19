@@ -61,7 +61,7 @@ def test_ensure_numeric_dimensions():
         _ensure_numeric(test_array_2D)
 
 def test_ensure_numeric_nan():
-    test_array_2D = np.array([[1, 2, 3, np.nan]])
+    test_array_2D = np.array([1, 2, 3, np.nan])
     with pytest.raises(ValueError):
         _ensure_numeric(test_array_2D)
 
@@ -219,7 +219,7 @@ def test_euclidean_distance_empty():
 
 def test_euclidean_distance_nan():
     test_array_1 = np.array([2, 3])
-    test_array_2 = np.array([[5, np.nan]])
+    test_array_2 = np.array([5, np.nan])
     with pytest.raises(ValueError):
         euclidean_distance(test_array_1, test_array_2)
 
@@ -384,7 +384,7 @@ def test_manhattan_distance_empty():
 
 def test_manhattan_distance_nan():
     test_array_1 = np.array([2, 3])
-    test_array_2 = np.array([[5, np.nan]])
+    test_array_2 = np.array([5, np.nan])
     with pytest.raises(ValueError):
         manhattan_distance(test_array_1, test_array_2)
 
@@ -557,7 +557,7 @@ def test_minkowski_distance_empty():
 
 def test_minkowski_distance_nan():
     test_array_1 = np.array([2, 3])
-    test_array_2 = np.array([[5, np.nan]])
+    test_array_2 = np.array([5, np.nan])
     with pytest.raises(ValueError):
         minkowski_distance(test_array_1, test_array_2, p = 3)
 
