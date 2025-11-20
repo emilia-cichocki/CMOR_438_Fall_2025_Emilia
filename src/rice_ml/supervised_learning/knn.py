@@ -8,7 +8,25 @@
 
     Functions
     ---------
-    
+    _validate_parameters
+        Ensures that all parameters are accepted
+    _validate_arrays
+        Ensures that provided arrays are of appropriate data type and dimension
+    _distance_calculations
+        Calculates pairwise distance between array rows
+    _neighbor_finding
+        Finds the distance and indices of the nearest neighbors to each query
+    _weighting_by_distance
+        Applies the specified weighting (uniform or based on distance)
+
+    Classes
+    ---------
+    _knn_foundation
+        Provides the base structure for KNN (fitting the model and implementing the algorithm)
+    knn_classifier
+        Runs the KNN algorithm for classification
+    knn_regressor
+        Runs the KNN algorithm for regression
 """
 
 # TODO: finish editing the above description, add examples, and add a tiebreaker ability/warning for when k is even
@@ -262,6 +280,7 @@ class knn_classification(_knn_foundation):
         probability_matrix = self.probabilities(query_data)
 
         max_prob_location = np.argmax(probability_matrix, axis = 1)
+        
         return self.classes_[max_prob_location]
     
     def scoring(self, query_data: ArrayLike, actual_labels: ArrayLike) -> float:

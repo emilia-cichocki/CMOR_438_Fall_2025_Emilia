@@ -5,6 +5,7 @@ import pytest
 from unittest.mock import patch
 from rice_ml.supervised_learning.knn import _validate_parameters, _validate_arrays, _distance_calculations, _neighbor_finding, _weighting_by_distance, _knn_foundation, knn_classification, knn_regressor
 
+# TODO: rename 'test_arrays' for lists/df, fix the formatting and spacing, add comments to indicate functions being tested
 
 def assert_array_output(test_array, test_labels, result_array, result_labels):
     assert isinstance(result_array, np.ndarray)
@@ -28,14 +29,14 @@ def assert_probabilities(prob_matrix, n_queries, n_classes):
         assert np.isfinite(row).all()
         assert abs(row.sum() - 1.0) < 1e-10
 
-
-
 def array_initializations_classification(weight: str = 'uniform'):
     train_array = np.array([[0, 0], [1, 1], [1, 2]])
     train_labels = np.array([1, 2, 2])
     knn = knn_classification(k = 2, weight = weight)
     knn.fit(train_array, train_labels)
     return knn
+
+
 
 def test_validate_parameters_basic():
     k = 3
@@ -48,7 +49,6 @@ def test_validate_parameters_k_npint():
     metric = 'euclidean'
     weight = 'uniform'
     _validate_parameters(k, metric, weight)
-
 
 def test_validate_parameters_type_k_float():
     k = 3.0
@@ -124,13 +124,11 @@ def test_validate_arrays_basic_df():
     result_array, result_labels = _validate_arrays(test_array, test_labels)
     assert_array_output(test_array, test_labels, result_array, result_labels)
 
-
 def test_validate_arrays_basic_lists():
     test_array = [[1, 2], [3, 4]]
     test_labels =[0, 1]
     result_array, result_labels = _validate_arrays(test_array, test_labels)
     assert_array_output(test_array, test_labels, result_array, result_labels)
-
 
 def test_validate_arrays_basic_tuples():
     test_array = ([1, 2], [3, 4])
@@ -138,20 +136,17 @@ def test_validate_arrays_basic_tuples():
     result_array, result_labels = _validate_arrays(test_array, test_labels)
     assert_array_output(test_array, test_labels, result_array, result_labels)
 
-
 def test_validate_arrays_basic_mixed():
     test_array = np.array([[1, 2], [3, 4]])
     test_labels = [0, 1]
     result_array, result_labels = _validate_arrays(test_array, test_labels)
     assert_array_output(test_array, test_labels, result_array, result_labels)
 
-
 def test_validate_arrays_basic_strings():
     test_array = np.array([[1, 2], [3, 4]])
     test_labels = np.array(['a', 'b'])
     result_array, result_labels = _validate_arrays(test_array, test_labels)
     assert_array_output(test_array, test_labels, result_array, result_labels)
-
 
 def test_validate_arrays_basic_no_labels():
     test_array = np.array([[1, 2], [3, 4]])
@@ -1168,7 +1163,7 @@ def test_knn_regressor_scoring_type_labels():
 def test_knn_regressor_scoring_match_shape():
     knn = array_initializations_regressor('uniform')
     query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1, 1, 1])
+    actual_labels = np.array([1, 1, 2])
     with pytest.raises(ValueError):
         knn.scoring(query_array, actual_labels)
 
