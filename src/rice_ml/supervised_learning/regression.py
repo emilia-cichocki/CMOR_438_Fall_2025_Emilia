@@ -13,8 +13,11 @@
    
 """
 
+# TODO: finish above!
+
 __all__ = [
     'linear_regression',
+    'logistic_regression'
 ]
 
 import numpy as np
@@ -28,15 +31,15 @@ from rice_ml.supervised_learning.distances import _ensure_numeric
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
 
-def _validate_parameters(method: Literal['normal', 'gradient_descent'],
+def _validate_parameters(method: Literal['normal', 'gradient_descent'] = None,
                          learning_rate: Optional[float] = None,
                          epochs: Optional[int] = None,
                          fit_intercept: bool = True, 
                          ) -> None:
 
-    # TODO: add docstrings
+    # TODO: add docstrings, potentially add functionality for collecting/graphing error counts
 
-    if method not in ('normal', 'gradient_descent'):
+    if method is not None and method not in ('normal', 'gradient_descent'):
         raise ValueError(f"Regression method must be one of {['normal', 'gradient_descent']}")
     if learning_rate is not None and not isinstance(learning_rate, (int, float)):
         raise TypeError('Learning rate must be a float')
@@ -82,6 +85,47 @@ def _validate_arrays(data_array: Optional[ArrayLike] = None,
         return array
     elif target_vector is not None:
         return vector
+    
+def _validate_arrays_logistic(data_array: Optional[ArrayLike] = None,
+                              target_vector: Optional[ArrayLike] = None
+                              ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
+
+    # TODO: add docstrings
+
+    if data_array is not None:
+        array = _2D_numeric(data_array, 'data_array')
+
+        if np.isnan(array).any():
+            raise ValueError('Data array contains missing data (NaN values)')
+
+    if target_vector is not None:
+        target_vector = np.array(target_vector)
+        if target_vector.ndim == 2 and (target_vector.shape[1] == 1 or target_vector.shape[0] == 1):
+            vector = target_vector.reshape(-1)
+            vector = _1D_vectorized(vector, 'target_vector')
+        else:
+            vector = _1D_vectorized(target_vector, 'target_vector')
+        classes = np.unique(target_vector)
+        if len(classes) != 2:
+            raise ValueError("Logistic regression only supports binary targets")
+        mapping = {classes[0]: 0, classes[1]: 1}
+        vector = (np.vectorize(mapping.get)(target_vector)).reshape(-1)
+        if np.isnan(vector).any():
+            raise ValueError('Target vector contains missing data (NaN values)')
+
+    if data_array is not None and target_vector is not None:
+        _shape_match(array, vector)
+        return array, vector
+    elif data_array is not None:
+        return array
+    elif target_vector is not None:
+        return vector
+    
+def _sigmoid(z):
+    
+    # TODO: add unit tests?
+
+    return 1.0/(1.0 + np.exp(-z))
 
 
 class linear_regression:
@@ -119,7 +163,7 @@ class linear_regression:
         
         self._training_array = train_array
         self._training_targets = train_targets
-        
+
         if self.fit_intercept:
             train_array = np.hstack([np.ones((train_array.shape[0], 1)), train_array])
 
@@ -191,6 +235,9 @@ class linear_regression:
         predicted_target_array = self.prediction(testing_array)
         actual_target_array = _ensure_numeric(actual_targets)
 
+        if predicted_target_array.shape != actual_target_array.shape:
+            raise ValueError("Shapes of predicted and actual targets must match")
+
         rss = np.sum((predicted_target_array - actual_target_array) ** 2)
         actual_mean = np.mean(actual_target_array)
         tss = np.sum((actual_target_array - actual_mean) ** 2)
@@ -207,3 +254,97 @@ class linear_regression:
         r2_score = 1 - (rss / tss)
 
         return r2_score
+    
+class logistic_regression():
+    
+    def __init__(self,
+                 epochs: int = 1000,
+                 learning_rate: float = 0.01
+                 ) -> None:
+
+        _validate_parameters(learning_rate = learning_rate, epochs = epochs)
+        
+        self.epochs = epochs
+        self.learning_rate = learning_rate
+        self.coef_: Optional[np.ndarray] = None
+        self.bias_: Optional[float] = None
+        self.class_mapping_: Optional[dict] = None
+    
+    def fit(self, training_array: np.ndarray, training_targets: np.ndarray, random_state: Optional[int] = None, shuffle: bool = True) -> 'logistic_regression':
+        
+        # TODO: docstrings/comments 
+
+        if not isinstance(shuffle, bool):
+            raise TypeError('Shuffle must be a boolean')
+        
+        rng = _random_number(random_state)
+
+        train_array, train_targets = _validate_arrays_logistic(training_array, training_targets)
+        
+        classes = np.unique(training_targets)
+
+        self.class_mapping_ = {0: classes[0], 1: classes[1]}
+        
+        train_array = np.hstack([np.ones((train_array.shape[0], 1)), train_array])
+        weights = rng.standard_normal(train_array.shape[1]).reshape(-1)
+        
+        for iteration in range(self.epochs):
+            if shuffle:
+                indices = rng.permutation(train_array.shape[0])
+            else:
+                indices = np.arange(train_array.shape[0])
+            for entry in indices:
+                x = train_array[entry]
+                y = train_targets[entry]
+                learn_rate = self.learning_rate
+                z = _sigmoid(np.matmul(x, weights))
+                error = z - y
+                weights -= learn_rate * error * x
+            
+        self.bias_ = weights[0]
+        self.coef_ = weights[1:]
+
+        return self
+    
+    def _verify_fit(self) -> Tuple[np.ndarray, np.ndarray]:
+        if self.coef_ is None:
+            raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
+
+        return self
+    
+
+    def prediction(self, testing_array: np.ndarray, threshold: float = 0.5) -> np.ndarray:
+        
+        # TODO: doctrings/comments
+
+        self._verify_fit()
+
+        test_array = _validate_arrays_logistic(testing_array)
+        
+        coef_array = _1D_vectorized(self.coef_) # TODO: fix this!
+
+        if test_array.shape[1] != len(coef_array):
+            raise ValueError('Test array must have the same number of input features as coefficients')
+        
+        bias = self.bias_
+        prediction_value = _sigmoid(np.matmul(test_array, coef_array) + bias)
+
+        prediction_prob = np.array([1 if x > threshold else 0 for x in prediction_value])
+
+        classification = np.array([self.class_mapping_[prediction] for prediction in prediction_prob])
+
+        return classification
+    
+    def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike) -> np.ndarray:
+
+        # TODO: be consistent w/ arraylike vs np.ndarray
+
+        predicted_target_array = self.prediction(testing_array)
+        actual_target_array = _1D_vectorized(actual_targets)
+
+        if predicted_target_array.shape != actual_target_array.shape:
+            raise ValueError("Shapes of predicted and actual targets must match")
+        
+        accuracy = np.mean(predicted_target_array == actual_target_array)
+
+        return accuracy

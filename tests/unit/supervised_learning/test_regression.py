@@ -4,10 +4,9 @@ import pandas as pd
 import pytest
 import warnings
 from unittest.mock import patch
-from rice_ml.supervised_learning.regression import _validate_parameters, _validate_arrays, linear_regression
+from rice_ml.supervised_learning.regression import _validate_parameters, _validate_arrays, _sigmoid, linear_regression, logistic_regression
 
 # TODO: rename 'test_arrays' for lists/df, fix the formatting and spacing, add comments to indicate functions being tested
-
 
 def test_validate_parameters_basic():
     method = 'gradient_descent'
@@ -562,13 +561,6 @@ def test_linear_regression_fit_vector_dimensions():
     with pytest.raises(ValueError):
         linreg.fit(train_array, train_targets, None)
 
-def test_linear_regression_fit_vector_dimensions():
-    train_array = np.array([[1, 1, 2, 3, 4]])
-    train_targets = np.array([[[1, 5, 8, 11, 14]]])
-    linreg = linear_regression('gradient_descent', True, learning_rate = 0.01, epochs = 1000)
-    with pytest.raises(ValueError):
-        linreg.fit(train_array, train_targets, None)
-
 def test_linear_regression_fit_singular_normal():
     train_array = np.array([[1, 2], [2, 4], [3, 6]])
     train_targets = np.array([1, 2, 3])
@@ -757,16 +749,6 @@ def test_linear_regression_scoring_strings():
     linreg = linear_regression('normal', True)
     linreg.fit(train_array, train_targets)
     test_array = np.array([[4], [5]])
-    actual_array = np.array([1, 2, 3])
-    with pytest.raises(TypeError):
-        linreg.scoring(test_array, actual_array)
-
-def test_linear_regression_scoring_strings():
-    train_array = np.array([[1], [2], [3]])
-    train_targets = np.array([1, 2, 3])
-    linreg = linear_regression('normal', True)
-    linreg.fit(train_array, train_targets)
-    test_array = np.array([[4], [5]])
     actual_array = np.array(['a', 2])
     with pytest.raises(TypeError):
         linreg.scoring(test_array, actual_array)
@@ -781,9 +763,445 @@ def test_linear_regression_scoring_nan():
     with pytest.raises(ValueError):
         linreg.scoring(test_array, actual_array)
 
+def test_linear_regression_scoring_lengths():
+    train_array = np.array([[1], [2], [3]])
+    train_targets = np.array([1, 2, 3])
+    linreg = linear_regression('normal', True)
+    linreg.fit(train_array, train_targets)
+    test_array = np.array([[4], [5]])
+    actual_array = np.array([1, 1, 1])
+    with pytest.raises(ValueError):
+        linreg.scoring(test_array, actual_array)
+
+def test_linear_regression_scoring_dimensions():
+    train_array = np.array([[1], [2], [3]])
+    train_targets = np.array([1, 2, 3])
+    linreg = linear_regression('normal', True)
+    linreg.fit(train_array, train_targets)
+    test_array = np.array([[4], [5]])
+    actual_array = np.array([[1, 1]])
+    with pytest.raises(ValueError):
+        linreg.scoring(test_array, actual_array)
+
 def test_linear_regression_scoring_unfit():
     linreg = linear_regression('normal', True)
     test_array = np.array([[4], [5]])
     actual_array = np.array([1, 2])
     with pytest.raises(RuntimeError):
         linreg.scoring(test_array, actual_array)
+
+
+
+
+
+def test_logistic_regression_init_basic():
+    logreg = logistic_regression(1000, 0.01)
+    assert logreg.epochs == 1000
+    assert logreg.learning_rate == 0.01
+    assert logreg.coef_ is None
+    assert logreg.bias_ is None
+    assert logreg.class_mapping_ is None
+
+def test_logistic_regression_init_type_inputs():
+    with pytest.raises(TypeError):
+        logistic_regression('1000', 0.01)
+    with pytest.raises(TypeError):
+        logistic_regression(1000, '0.01')
+
+def test_logistic_regression_init_input_values():
+    with pytest.warns(UserWarning, match = "learning rate"):
+        logistic_regression(epochs = 1000, learning_rate = -0.01)
+    with pytest.raises(ValueError):
+        logistic_regression(epochs = -1000, learning_rate = 0.01)
+
+def test_logistic_regression_fit_basic():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (1,)
+    assert logreg.coef_[0] > 0
+    assert logreg.bias_ < 0
+
+def test_logistic_regression_fit_basic():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (1,)
+    assert logreg.coef_[0] > 0
+    assert logreg.bias_ < 0
+
+def test_logistic_regression_fit_nonzero():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, -1, -1, -1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (1,)
+    assert logreg.coef_[0] < 0
+    assert logreg.bias_ > 0
+
+def test_logistic_regression_fit_mult_feat():
+    train_array = np.array([
+        [1, 1],
+        [2, 0],
+        [0, 3],
+        [4, 1],
+        [3, 2]
+    ])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (2,)
+    
+def test_logistic_regression_fit_shuffle():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg1 = logistic_regression(epochs = 10000, learning_rate = 0.1)
+    logreg1.fit(train_array, train_targets, shuffle = True)
+    assert isinstance(logreg1.coef_, np.ndarray)
+    assert np.isscalar(logreg1.bias_)
+    assert logreg1.coef_.shape == (1,)
+    logreg2 = logistic_regression(epochs = 10000, learning_rate = 0.1)
+    logreg2.fit(train_array, train_targets, shuffle = True)
+    assert isinstance(logreg2.coef_, np.ndarray)
+    assert np.isscalar(logreg2.bias_)
+    assert logreg1.coef_.shape == (1,)
+    assert np.allclose(logreg1.coef_, logreg2.coef_, rtol = 1e-2, atol = 1e-2)
+    assert np.isclose(logreg1.bias_, logreg2.bias_, rtol = 1e-2, atol = 1e-2)
+
+def test_logistic_regression_random_state_reproducibility():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg1 = logistic_regression(epochs = 10000, learning_rate = 0.01)
+    logreg1.fit(train_array, train_targets, random_state = 72, shuffle = True)
+    logreg2 = logistic_regression(epochs = 10000, learning_rate = 0.01)
+    logreg2.fit(train_array, train_targets, random_state = 72, shuffle = True)
+    assert np.allclose(logreg1.coef_, logreg2.coef_, rtol = 1e-3, atol = 1e-3)
+    assert np.isclose(logreg1.bias_, logreg2.bias_, rtol = 1e-3, atol = 1e-3)
+
+def test_logistic_regression_fit_strings():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array(['a', 'a', 'b', 'b', 'b'])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (1,)
+    assert logreg.coef_[0] > 0
+    assert logreg.bias_ < 0
+
+def test_logistic_regression_fit_mixed():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 'b', 'b', 'b'])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (1,)
+    assert logreg.coef_[0] > 0
+    assert logreg.bias_ < 0
+
+def test_logistic_regression_fit_2D_hor():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([[0, 0, 1, 1, 1]])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (1,)
+    assert logreg.coef_[0] > 0
+    assert logreg.bias_ < 0
+
+def test_logistic_regression_fit_2D_ver():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([[0], [0], [1], [1], [1]])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    logreg.fit(train_array, train_targets)
+    assert isinstance(logreg.coef_, np.ndarray)
+    assert np.isscalar(logreg.bias_)
+    assert logreg.coef_.shape == (1,)
+    assert logreg.coef_[0] > 0
+    assert logreg.bias_ < 0
+
+def test_logistic_regression_fit_nonbinary():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 2])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_nan_array():
+    train_array = np.array([[0], [np.nan], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_nan_vector():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, np.nan, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_empty_array():
+    train_array = np.array([[]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_empty_vector():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_data_type_array():
+    train_array = np.array([['a'], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(TypeError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_type_array():
+    train_array = 'np.array([[0], [1], [2], [3], [4]])'
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(TypeError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_type_vector():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = 'np.array([0, 0, 1, 1, 1])'
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_match_shape():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_internal_shape():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([[0, 0], [0, 0], [1, 1], [1, 1], [1, 1]])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_array_dimensions():
+    train_array = np.array([0, 1, 2, 3, 4])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_vector_dimensions():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([[[0, 0, 1, 1, 1]]])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(ValueError):
+        logreg.fit(train_array, train_targets)
+
+def test_logistic_regression_fit_data_type_random_state():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(TypeError):
+        logreg.fit(train_array, train_targets, random_state = '1')
+
+def test_logistic_regression_fit_data_type_shuffle():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(TypeError):
+        logreg.fit(train_array, train_targets, shuffle = 'True')
+    
+def test_logistic_regression_verify_fit_basic():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    logreg._verify_fit()
+
+def test_logistic_regression_verify_fit_unfit():
+    logreg = logistic_regression(1000, 0.01)
+    with pytest.raises(RuntimeError):
+        logreg._verify_fit()
+
+def test_logistic_regression_prediction_basic():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    classification = logreg.prediction(test_array)
+    assert isinstance(classification, np.ndarray) 
+    assert classification.shape == (2,)
+    assert np.array_equal(classification, np.array([1, 1]))
+
+def test_logistic_regression_prediction_neg():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, -1, -1, -1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    classification = logreg.prediction(test_array)
+    assert isinstance(classification, np.ndarray) 
+    assert classification.shape == (2,)
+    assert np.array_equal(classification, np.array([-1, -1]))
+
+def test_logistic_regression_prediction_strings():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array(['a', 'a', 'b', 'b', 'b'])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[0.5], [3.5]])
+    classification = logreg.prediction(test_array)
+    assert isinstance(classification, np.ndarray) 
+    assert classification.shape == (2,)
+    assert np.array_equal(classification, np.array(['a', 'b']))
+
+def test_logistic_regression_prediction_mult_feat():
+    train_array = np.array([
+                           [1, 1],
+                           [2, 0],
+                           [0, 3],
+                           [4, 1],
+                           [3, 2]
+    ])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[0.5, 0.5], [3.5, 3.5]])
+    classification = logreg.prediction(test_array)
+    assert isinstance(classification, np.ndarray) 
+    assert classification.shape == (2,)
+    assert np.array_equal(classification, np.array([0, 1]))
+
+def test_logistic_regression_prediction_dimensions():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([0, 2])
+    with pytest.raises(ValueError):
+        logreg.prediction(test_array)
+    
+def test_logistic_regression_prediction_mismatch():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[0, 2]])
+    with pytest.raises(ValueError):
+        logreg.prediction(test_array)
+
+def test_logistic_regression_prediction_data_type_array():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([['a'], [2]])
+    with pytest.raises(TypeError):
+        logreg.prediction(test_array)
+
+def test_logistic_regression_prediction_data_type_unfit():
+    logreg = logistic_regression(1000, 0.01)
+    test_array = np.array([[0], [2]])
+    with pytest.raises(RuntimeError):
+        logreg.prediction(test_array)
+
+def test_logistic_regression_scoring_basic():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = np.array([0, 1])
+    score = logreg.scoring(test_array, actual_array)
+    assert isinstance(score, float)
+    assert np.isclose(score, 0.5)
+
+def test_logistic_regression_scoring_correct():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = np.array([1, 1])
+    score = logreg.scoring(test_array, actual_array)
+    assert isinstance(score, float)
+    assert np.isclose(score, 1)
+
+def test_logistic_regression_scoring_incorrect():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = np.array([0, 0])
+    score = logreg.scoring(test_array, actual_array)
+    assert isinstance(score, float)
+    assert np.isclose(score, 0)
+
+def test_logistic_regression_scoring_strings():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 'a', 'a', 'a'])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = np.array(['a', 'a'])
+    score = logreg.scoring(test_array, actual_array)
+    assert isinstance(score, float)
+    assert np.isclose(score, 1)
+
+def test_logistic_regression_scoring_type_labels():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = 'np.array([1, 1])'
+    with pytest.raises(TypeError):
+        logreg.scoring(test_array, actual_array)
+
+def test_logistic_regression_scoring_lengths():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = np.array([1, 1, 1])
+    with pytest.raises(ValueError):
+        logreg.scoring(test_array, actual_array)
+
+def test_logistic_regression_scoring_dimensions():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = np.array([[1, 1]])
+    with pytest.raises(ValueError):
+        logreg.scoring(test_array, actual_array)
+
+def test_logistic_regression_scoring_unfit():
+    logreg = logistic_regression(1000, 0.01)
+    test_array = np.array([[2.5], [3.5]])
+    actual_array = np.array([[1, 1]])
+    with pytest.raises(RuntimeError):
+        logreg.scoring(test_array, actual_array)
