@@ -317,6 +317,9 @@ class logistic_regression():
         
         # TODO: doctrings/comments
 
+        if not isinstance(threshold, float):
+            raise TypeError('Threshold value must be a float')
+        
         self._verify_fit()
 
         test_array = _validate_arrays_logistic(testing_array)
@@ -335,11 +338,11 @@ class logistic_regression():
 
         return classification
     
-    def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike) -> np.ndarray:
+    def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike, threshold: float = 0.5) -> np.ndarray:
 
         # TODO: be consistent w/ arraylike vs np.ndarray
 
-        predicted_target_array = self.prediction(testing_array)
+        predicted_target_array = self.prediction(testing_array, threshold)
         actual_target_array = _1D_vectorized(actual_targets)
 
         if predicted_target_array.shape != actual_target_array.shape:
@@ -348,3 +351,5 @@ class logistic_regression():
         accuracy = np.mean(predicted_target_array == actual_target_array)
 
         return accuracy
+    
+# TODO: potentially add more unit tests for thresholds and validate_arrays_logistic

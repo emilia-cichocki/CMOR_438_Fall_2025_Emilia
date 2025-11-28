@@ -1097,7 +1097,7 @@ def test_logistic_regression_prediction_dimensions():
     train_targets = np.array([0, 0, 1, 1, 1])
     logreg = logistic_regression(1000, 0.01)
     logreg.fit(train_array, train_targets)
-    test_array = np.array([0, 2])
+    test_array = np.array([0, 1])
     with pytest.raises(ValueError):
         logreg.prediction(test_array)
     
@@ -1106,7 +1106,7 @@ def test_logistic_regression_prediction_mismatch():
     train_targets = np.array([0, 0, 1, 1, 1])
     logreg = logistic_regression(1000, 0.01)
     logreg.fit(train_array, train_targets)
-    test_array = np.array([[0, 2]])
+    test_array = np.array([[0, 1]])
     with pytest.raises(ValueError):
         logreg.prediction(test_array)
 
@@ -1115,7 +1115,7 @@ def test_logistic_regression_prediction_data_type_array():
     train_targets = np.array([0, 0, 1, 1, 1])
     logreg = logistic_regression(1000, 0.01)
     logreg.fit(train_array, train_targets)
-    test_array = np.array([['a'], [2]])
+    test_array = np.array([['a'], [1]])
     with pytest.raises(TypeError):
         logreg.prediction(test_array)
 
@@ -1124,6 +1124,16 @@ def test_logistic_regression_prediction_data_type_unfit():
     test_array = np.array([[0], [2]])
     with pytest.raises(RuntimeError):
         logreg.prediction(test_array)
+
+def test_logistic_regression_prediction_threshold():
+    logreg = logistic_regression(1000, 0.01)
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[1], [1]])
+    with pytest.raises(TypeError):
+        logreg.prediction(test_array, '0.5')
 
 def test_logistic_regression_scoring_basic():
     train_array = np.array([[0], [1], [2], [3], [4]])
