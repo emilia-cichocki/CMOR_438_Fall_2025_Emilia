@@ -171,3 +171,108 @@ class k_means():
         cluster_predictions = self._clustering(test_array, self.centroids_)
 
         return cluster_predictions
+    
+# TODO: maybe add transform?
+
+def _validate_parameters_dbscan(epsilon: float, core_point_min: int) -> None:
+
+    if not isinstance(epsilon, (float, int)):
+        raise TypeError('Epsilon must be a float or integer')
+    if epsilon < 0:
+        raise ValueError('Epsilon must be non-negative')
+    if not isinstance(core_point_min, int):
+        raise TypeError('Minimum number of neighboring samples to be considered a core point must be an integer')
+    if core_point_min < 0:
+        raise ValueError('Minimum number of neighboring samples to be considered a core point must be non-negative')
+    
+class dbscan():
+
+    def __init__(self,
+                 epsilon: float,
+                 core_point_min: int) -> None:
+        
+        _validate_parameters_dbscan(epsilon, core_point_min)
+
+        self.epsilon = epsilon
+        self.min_points = core_point_min
+        self.cluster_labels: Optional[np.ndarray] = None
+        self.core_point_indices: Optional[np.ndarray] = None
+
+    def _distance_calc(self, training_array: np.ndarray) -> np.ndarray:
+
+        n_features = training_array.shape[0]
+        distance_array = np.full((n_features, n_features), np.nan)
+
+        for feature_1 in range(n_features):
+            for feature_2 in range(n_features):
+                distance_array[feature_1, feature_2] = euclidean_distance(training_array[feature_1], training_array[feature_2])
+
+        if any(value is np.nan or value is None for value in distance_array):
+            raise ValueError('Distance was not computed for all points')
+        
+        return distance_array
+    
+    def _find_neighbors(self, point_index: int, distance_array: np.ndarray) -> list:
+        
+        distances = _2D_numeric(distance_array)
+        if not isinstance(point_index, int):
+            raise TypeError('Point index must be an integer')
+        if point_index < 0:
+            raise ValueError('Point index must be non-negative')
+        
+        neighbors = np.where(distances[point_index] <= self.epsilon)[0]
+        neighbors = neighbors.tolist()
+
+        return neighbors
+
+    def _expand_region(self, 
+                       cluster_labels: np.ndarray, 
+                       point_index: int, 
+                       neighbor_list: list,
+                       cluster_id: int,
+                       distance_array: np.ndarray) -> None:
+        
+        cluster_labels[point_index] = cluster_id
+
+        i = 0
+        while i < len(neighbor_list):
+            neighbor_point_index = neighbor_list[i]
+
+            if cluster_labels[neighbor_point_index] == -1:
+                cluster_labels[neighbor_point_index] = cluster_id
+
+            new_neighbors = self._find_neighbors(neighbor_point_index, distance_array)
+
+            if len(new_neighbors) >= self.min_points:
+                for neighbor in new_neighbors:
+                    if neighbor not in neighbor_list:
+                        neighbor_list.append(neighbor)
+            
+            i += 1
+
+    def fit(self, training_array: ArrayLike) -> 'dbscan':
+
+        train_array = _2D_numeric(training_array)
+        n_samples = train_array.shape[0]
+
+        cluster_labels = np.full(n_samples, -1, dtype = int)
+        cluster_id = 0
+
+        distance_array = self._distance_calc(train_array)
+
+        for point_index in range(n_samples):
+            if cluster_labels[point_index] != -1:
+                continue
+            
+            neighbor_list = self._find_neighbors(point_index, distance_array)
+
+            if len(neighbor_list) < self.min_points:
+                cluster_labels[point_index] = -1
+            else:
+                self._expand_region(cluster_labels, point_index, neighbor_list, cluster_id, distance_array)
+                cluster_id += 1
+
+        self.cluster_labels = cluster_labels
+        self.core_sample_indices_ = np.where(np.array([len(self._find_neighbors(point, distance_array)) for point in range(n_samples)]) >= self.min_points)[0]
+
+        return self
