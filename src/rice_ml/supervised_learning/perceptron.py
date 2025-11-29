@@ -143,7 +143,7 @@ class Perceptron():
 
         return self
 
-    def _verify_fit(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _verify_fit(self) -> 'Perceptron':
         if self.coef_ is None or self.bias_ is None:
             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
 
