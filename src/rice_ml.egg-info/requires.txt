@@ -1,0 +1,9 @@
+numpy
+matplotlib
+pandas
+seaborn
+requests
+scipy
+
+[dev]
+pytest

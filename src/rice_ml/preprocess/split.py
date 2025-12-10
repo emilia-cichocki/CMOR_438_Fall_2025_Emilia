@@ -1,5 +1,5 @@
 """
-    Data splitting utilities (NumPy)
+    Data splitting utilities (NumPy and Pandas)
 
     This module splits NumPy arrays into training, testing, and (optionally) validation 
     data subsets for use in machine learning.
@@ -74,7 +74,7 @@ def _stratified_indices(data: np.ndarray,
     if not (0.0 < test_size < 1.0):
         raise ValueError(f"Test proportion must be between 0 and 1, got {test_size}")
     
-    data = _1D_numeric(data)
+    data = _1D_vectorized(data)
 
     if not validation:
         classes, label_index = np.unique(data, return_inverse = True)
@@ -193,7 +193,7 @@ def train_test(data_array: ArrayLike,
 
     if not validation:
         if not stratify is None:
-            stratify_array = _1D_numeric(stratify, 'stratify')
+            stratify_array = _1D_vectorized(stratify, 'stratify')
             if len(stratify_array) != array.shape[0]:
                 raise ValueError('Stratify must have the same length as the data array')
             testing_indices, training_indices = _stratified_indices(stratify_array, test_size, rng)
@@ -211,7 +211,7 @@ def train_test(data_array: ArrayLike,
         if data_vector is None:
             return training_array, testing_array
         else:
-            vector = _1D_numeric(data_vector, 'label')
+            vector = _1D_vectorized(data_vector, 'label')
             _shape_match(array, vector)
             training_data_vector = vector[training_indices]
             testing_data_vector = vector[testing_indices]
@@ -226,7 +226,7 @@ def train_test(data_array: ArrayLike,
             raise ValueError("Combined validation and test set proportions must be less than 1.")
                 
         if not stratify is None:
-            stratify_array = _1D_numeric(stratify, 'stratify')
+            stratify_array = _1D_vectorized(stratify, 'stratify')
             if len(stratify_array) != array.shape[0]:
                 raise ValueError('Stratify must have the same length as the data array')
             testing_indices, training_indices, val_indices = _stratified_indices(stratify_array, test_size, rng, validation = True, val_size = val_size)
@@ -251,7 +251,7 @@ def train_test(data_array: ArrayLike,
         if data_vector is None:
             return training_array, testing_array, val_array
         else:
-            vector = _1D_numeric(data_vector, 'label')
+            vector = _1D_vectorized(data_vector, 'label')
             _shape_match(array, vector)
             training_data_vector = vector[training_indices]
             testing_data_vector = vector[testing_indices]

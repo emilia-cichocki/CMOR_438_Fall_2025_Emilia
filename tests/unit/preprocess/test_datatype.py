@@ -19,6 +19,13 @@ def test_2D_numeric_basic_array_float():
     assert result_array.dtype in [np.float64, np.float32]
     assert result_array.shape == (2, 3)
 
+def test_2D_numeric_basic_array_strings():
+    test_array = np.array([['1', '2', '3'], ['2', '4', '6']])
+    result_array = _2D_numeric(test_array, 'test_array')
+    assert isinstance(result_array, np.ndarray)
+    assert result_array.dtype in [np.float64, np.float32]
+    assert result_array.shape == (2, 3)
+
 def test_2D_numeric_basic_df():
     test_df = pd.DataFrame({
         'A': [1, 2, 1, 4, 1],
@@ -52,6 +59,12 @@ def test_2D_numeric_empty():
     with pytest.raises(ValueError):
         _2D_numeric(test_array, 'test_array')
 
+def test_2D_numeric_nan():
+    test_array = np.array([[1, 2, np.nan], [np.nan, 4, 6]])
+    result_array = _2D_numeric(test_array, 'test_array')
+    assert isinstance(result_array, np.ndarray)
+    assert result_array.shape == (2, 3)
+
 def test_2D_numeric_type_input():
     test_array = 'test_array'
     with pytest.raises(TypeError):
@@ -68,59 +81,59 @@ def test_2D_numeric_naming_input():
 
 
 
-def test_1D_numeric_basic_array():
+def test_1D_vectorized_basic_array():
     test_array = np.array([1, 2, 3])
-    result_array = _1D_numeric(test_array, 'test_array')
+    result_array = _1D_vectorized(test_array, 'test_array')
     assert isinstance(result_array, np.ndarray)
     assert result_array.shape == (3,)
 
-def test_1D_numeric_basic_array_float():
+def test_1D_vectorized_basic_array_float():
     test_array = np.array([1.1, 2.2, 3.3])
-    result_array = _1D_numeric(test_array, 'test_array')
+    result_array = _1D_vectorized(test_array, 'test_array')
     assert isinstance(result_array, np.ndarray)
     assert result_array.dtype in [np.float64, np.float32]
     assert result_array.shape == (3,)
 
-def test_1D_numeric_basic_df():
+def test_1D_vectorized_basic_df():
     test_df = pd.Series([1, 2, 1, 4, 1])
-    result_array = _1D_numeric(test_df, 'test_df')
+    result_array = _1D_vectorized(test_df, 'test_df')
     assert isinstance(result_array, np.ndarray)
     assert result_array.shape == (5,)
 
-def test_1D_numeric_basic_list():
+def test_1D_vectorized_basic_list():
     test_list = [1, 2, 3]
-    result_array = _1D_numeric(test_list, 'test_list')
+    result_array = _1D_vectorized(test_list, 'test_list')
     assert isinstance(result_array, np.ndarray)
     assert result_array.shape == (3,)
 
-def test_1D_numeric_dimensions():
+def test_1D_vectorized_dimensions():
     test_array_2D = np.array([[1, 2, 3], [2, 4, 6]])
     test_array_3D = np.array([[[1, 2], [1, 2]],[[2, 4], [5, 10]]])
     with pytest.raises(ValueError):
-        _1D_numeric(test_array_2D, 'test_array_2D')
+        _1D_vectorized(test_array_2D, 'test_array_2D')
     with pytest.raises(ValueError):
-        _1D_numeric(test_array_3D, 'test_array_3D')
+        _1D_vectorized(test_array_3D, 'test_array_3D')
 
-def test_1D_numeric_types():
+def test_1D_vectorized_types():
     test_array = np.array(['a', 'b', 'c'])
-    result_array = _1D_numeric(test_array, 'test_array')
+    result_array = _1D_vectorized(test_array, 'test_array')
     assert isinstance(result_array, np.ndarray)
     assert result_array.shape == (3,)
 
-def test_1D_numeric_empty():
+def test_1D_vectorized_empty():
     test_array = np.array([])
     with pytest.raises(ValueError):
-        _1D_numeric(test_array)
+        _1D_vectorized(test_array)
 
-def test_1D_numeric_type_input():
+def test_1D_vectorized_type_input():
     test_array = 'test_array'
     with pytest.raises(TypeError):
-        _1D_numeric(test_array, 'test_array')
+        _1D_vectorized(test_array, 'test_array')
 
-def test_1D_numeric_naming_input():
+def test_1D_vectorized_naming_input():
     test_array = np.array([1, 2, 3])
     with pytest.raises(TypeError):
-        _1D_numeric(test_array, test_array)
+        _1D_vectorized(test_array, test_array)
 
 
 
