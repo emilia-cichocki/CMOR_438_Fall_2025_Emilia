@@ -20,10 +20,7 @@ __all__ = [
     'regression_tree'
 ]
 
-
-
-# TODO: components of decision tree - node - goes through all possible splits to find what maximizes entropy
-# for each node, do that again lol
+# TODO: arraylike?
 
 import numpy as np
 import pandas as pd
