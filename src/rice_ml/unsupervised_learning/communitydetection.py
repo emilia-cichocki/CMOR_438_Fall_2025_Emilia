@@ -17,7 +17,7 @@
 # TODO: finish above! and check below for redundant imports
 
 __all__ = [
-    'label_prop',
+    'label_propagation',
 ]
 
 import numpy as np
@@ -31,7 +31,7 @@ from rice_ml.supervised_learning.distances import _ensure_numeric, euclidean_dis
 
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
-def validate_parameters(graph: nx.Graph, max_iter: int, random_state: Optional[int] = None):
+def _validate_parameters(graph: nx.Graph, max_iter: int, random_state: Optional[int] = None) -> None:
 
     if not isinstance(graph, nx.Graph):
         raise TypeError("Input graph must be a NetworkX graph")
@@ -48,7 +48,8 @@ class label_propagation():
                  graph: nx.Graph,
                  max_iter: int,
                  random_state: Optional[int] = None) -> None:
-        validate_parameters(graph, max_iter, random_state)
+        
+        _validate_parameters(graph, max_iter, random_state)
 
         self.graph = graph
         self.max_iter = max_iter

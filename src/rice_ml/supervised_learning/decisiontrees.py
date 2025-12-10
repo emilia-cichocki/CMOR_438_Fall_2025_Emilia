@@ -41,9 +41,9 @@ def _validate_parameters(max_depth: Optional[int], min_samples_split: Optional[i
         raise TypeError('Maximum depth must be an integer')
     if max_depth is not None and max_depth <= 0:
         raise ValueError('Maximum depth must be greater than zero')
-    if not isinstance(min_samples_split, int):
+    if min_samples_split is not None and not isinstance(min_samples_split, int):
         raise TypeError('Minimum samples required to split node must be an integer')
-    if min_samples_split <= 0:
+    if min_samples_split is not None and min_samples_split <= 0:
         raise TypeError('Minimum samples required to split node must be greater than zero')
     
 def _validate_parameters_node(feature_index: Optional[int], 
@@ -225,6 +225,16 @@ class decision_tree():
 
         return self
     
+    def _predict_recursive(self, testing_row: np.ndarray, node: Node) -> Union[int, float, str]:
+        
+        if node.value is not None:
+            return node.value
+        
+        if testing_row[node.feature_index] <= node.threshold:
+            return self._predict_recursive(testing_row, node.left)
+        else:
+            return self._predict_recursive(testing_row, node.right)
+        
     def predict(self, testing_array: ArrayLike) -> np.ndarray:
 
         self._verify_fit()
@@ -247,16 +257,6 @@ class decision_tree():
         predictions = np.array([self._reverse_class_mappings[p] for p in prediction_array], dtype=object)
         
         return predictions
-
-    def _predict_recursive(self, testing_row: np.ndarray, node: Node) -> Union[int, float, str]:
-        
-        if node.value is not None:
-            return node.value
-        
-        if testing_row[node.feature_index] <= node.threshold:
-            return self._predict_recursive(testing_row, node.left)
-        else:
-            return self._predict_recursive(testing_row, node.right)
     
     def print_tree(self, node: Optional[Node] = None, depth: int = 0) -> None:
         
@@ -271,6 +271,7 @@ class decision_tree():
             self.print_tree(node.left, depth + 1)
             self.print_tree(node.right, depth + 1)
 
+# TODO: add a scoring metric
 
 class regression_tree():
 
