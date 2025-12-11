@@ -44,7 +44,7 @@ def _validate_parameters(max_depth: Optional[int], min_samples_split: Optional[i
     if min_samples_split is not None and not isinstance(min_samples_split, int):
         raise TypeError('Minimum samples required to split node must be an integer')
     if min_samples_split is not None and min_samples_split <= 0:
-        raise TypeError('Minimum samples required to split node must be greater than zero')
+        raise ValueError('Minimum samples required to split node must be greater than zero')
     
 def _validate_parameters_node(feature_index: Optional[int], 
                               threshold_value: Optional[float], 
@@ -67,7 +67,6 @@ def _validate_parameters_node(feature_index: Optional[int],
 def _entropy(train_targets: np.ndarray):
 
     train_targets = _1D_vectorized(train_targets)
-
     _, counts = np.unique(train_targets, return_counts = True)
     probabilities = counts / np.sum(counts)
     probabilities_filtered = probabilities[probabilities > 0]
@@ -144,7 +143,8 @@ class decision_tree():
         best_threshold = None
 
         for feature in range(n_features):
-            possible_thresholds = np.unique(train_array[:, feature])
+            feature_values = np.sort(np.unique(train_array[:, feature]))
+            possible_thresholds = (feature_values[:-1] + feature_values[1:]) / 2
             for threshold in possible_thresholds:
                 left_indices = train_array[:, feature] <= threshold
                 right_indices = train_array[:, feature] > threshold
@@ -177,6 +177,8 @@ class decision_tree():
         train_array = _2D_numeric(training_array)
         train_targets = _1D_vectorized(training_targets)
 
+        _shape_match(train_array, train_targets)
+
         n_samples, n_features = train_array.shape
 
         if n_samples < self.min_samples_split:
@@ -200,7 +202,13 @@ class decision_tree():
         return Node(feature_index = best_feature, threshold_value = best_threshold, left = left_child, right = right_child)
     
     def fit(self, training_array: ArrayLike, training_targets: ArrayLike) -> "decision_tree":
-        
+
+        training_targets = _1D_vectorized(training_targets)
+        if pd.isna(training_targets).any():
+            raise ValueError('Target array contains NaN values')
+    
+        train_array = _2D_numeric(training_array)
+
         unique_classes = list(dict.fromkeys(training_targets))
         self._class_mappings = {cls: i for i, cls in enumerate(unique_classes)}
 
@@ -211,7 +219,6 @@ class decision_tree():
         
         train_targets = np.array([self._class_mappings[item] for item in training_targets])
         
-        train_array = _2D_numeric(training_array)
         self._n_features = train_array.shape[1]
 
         final_tree = self._build_tree(train_array, train_targets, 0)
@@ -244,8 +251,6 @@ class decision_tree():
         if test_array.shape[1] != self._n_features:
             raise ValueError("Number of features in testing data must match number of features in training data")
         
-        # TODO: add something to test that test_array has the same number of features
-
         prediction_array = np.full((test_array.shape[0],), np.nan, dtype = object)
         for sample in range(test_array.shape[0]):
             prediction = self._predict_recursive(test_array[sample, :], self.tree)
@@ -291,6 +296,13 @@ class regression_tree():
                           left_class: np.ndarray,
                           right_class: np.ndarray) -> float:
         
+        parent_class = _ensure_numeric(parent_class)
+        left_class = _ensure_numeric(left_class)
+        right_class = _ensure_numeric(right_class)
+
+        if len(left_class) == 0 or len(right_class) == 0:
+            raise ValueError("Length of right or left child is empty")
+
         parent_variance = np.var(parent_class)
         left_variance = np.var(left_class)
         right_variance = np.var(right_class)
@@ -352,6 +364,8 @@ class regression_tree():
         train_array = _2D_numeric(training_array)
         train_targets = _ensure_numeric(training_targets)
 
+        _shape_match(train_array, train_targets)
+
         n_samples, n_features = train_array.shape
 
         if n_samples < self.min_samples_split:
@@ -390,7 +404,17 @@ class regression_tree():
             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
 
         return self
-    
+
+    def _predict_recursive(self, testing_row: np.ndarray, node: Node) -> Union[int, float, str]:
+        
+        if node.value is not None:
+            return node.value
+        
+        if testing_row[node.feature_index] <= node.threshold:
+            return self._predict_recursive(testing_row, node.left)
+        else:
+            return self._predict_recursive(testing_row, node.right)
+        
     def predict(self, testing_array: ArrayLike) -> np.ndarray:
 
         self._verify_fit()
@@ -410,16 +434,6 @@ class regression_tree():
         
         return prediction_array
 
-    def _predict_recursive(self, testing_row: np.ndarray, node: Node) -> Union[int, float, str]:
-        
-        if node.value is not None:
-            return node.value
-        
-        if testing_row[node.feature_index] <= node.threshold:
-            return self._predict_recursive(testing_row, node.left)
-        else:
-            return self._predict_recursive(testing_row, node.right)
-    
     def print_tree(self, node: Optional[Node] = None, depth: int = 0) -> None:
         
         if node is None:
