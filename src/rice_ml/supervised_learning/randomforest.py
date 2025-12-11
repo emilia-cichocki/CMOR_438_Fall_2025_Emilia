@@ -52,8 +52,8 @@ def _validate_parameters_rf(n_trees: int,
         raise ValueError('Maximum depth must be greater than zero')
     if min_samples_split is not None and not isinstance(min_samples_split, int):
         raise TypeError('Minimum samples required to split node must be an integer')
-    if min_samples_split <= 0:
-        raise TypeError('Minimum samples required to split node must be greater than zero')
+    if min_samples_split is not None and min_samples_split <= 0:
+        raise ValueError('Minimum samples required to split node must be greater than zero')
     if max_features is not None:
         if not isinstance(max_features, (int, float)) and max_features not in ["sqrt", "log2"]:
             raise TypeError(f"Maximum number of features must be an integer, float, or in {['sqrt', 'log2']}")
@@ -97,12 +97,19 @@ class random_forest():
     def _feature_selection(self, total_features: int) -> np.ndarray:
         
         selection_type = self.max_features
+
+        if not isinstance(total_features, int):
+            raise TypeError('Total features must be an integer')
         
         if selection_type is None:
             return np.arange(total_features)
         if isinstance(selection_type, int):
+            if selection_type > total_features:
+                raise ValueError('Number of selected features cannot exceed total features')
             n_select = selection_type
         elif isinstance(selection_type, float):
+            if selection_type > 1:
+                raise ValueError('Proportion of selected features cannot exceed 1')
             n_select = max(1, int(selection_type * total_features))
         elif selection_type == 'sqrt':
             n_select = max(1, int(np.sqrt(total_features)))
@@ -121,6 +128,8 @@ class random_forest():
 
         train_array = _2D_numeric(training_array)
         train_targets = _1D_vectorized(training_targets)
+
+        _shape_match(train_array, train_targets)
 
         self.n_features_ = train_array.shape[1]
 

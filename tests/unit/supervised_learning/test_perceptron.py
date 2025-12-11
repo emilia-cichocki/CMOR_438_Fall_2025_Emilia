@@ -646,23 +646,124 @@ def test_mlp_init_input_values():
     with pytest.raises(ValueError):
         multilayer_Perceptron(layers = [2, 2, 1], epochs = -1000, learning_rate = 0.01)
 
+def test_weight_initialization_basic():
+    mlp = multilayer_Perceptron(layers = [2, 2, 1], epochs = 1000, learning_rate = 0.01)
+    test_weights, test_bias = mlp._weight_initialization()
+    assert isinstance(test_weights, list)
+    assert isinstance(test_bias, list)
+    assert len(test_weights) == 2
+    for element in test_weights:
+        assert isinstance(element, np.ndarray)
+    assert test_weights[0].shape == (2, 2)
+    assert test_weights[1].shape == (2, 1)
+    assert len(test_bias) == 2
+    for element in test_bias:
+        assert isinstance(element, np.ndarray)
+        assert np.all(element == 0)
+    assert test_bias[0].shape == (2,)
+    assert test_bias[1].shape == (1,)
 
+def test_weight_initialization_random_state():
+    mlp = multilayer_Perceptron(layers = [2, 2, 1], epochs = 1000, learning_rate = 0.01)
+    test_weights_1, test_bias_1 = mlp._weight_initialization(random_state = 42)
+    test_weights_2, test_bias_2 = mlp._weight_initialization(random_state = 42)
+    assert len(test_weights_1) == len(test_weights_2)
+    assert len(test_bias_1) == len(test_bias_2)
+    for i in range(len(test_weights_1)):
+        assert np.allclose(test_weights_1[i], test_weights_2[i])
 
+def test_weight_initialization_type_input():
+    mlp = multilayer_Perceptron(layers = [2, 2, 1], epochs = 1000, learning_rate = 0.01)
+    with pytest.raises(TypeError):
+        mlp._weight_initialization(random_state = '42')
 
+def test_forward_layer_basic():
 
-    # def _weight_initialization(self, random_state: Optional[int] = None) -> Tuple[list, list]:
-    #     layers = self.layers
-    #     weights = []
-    #     bias = []
-    #     rng = _random_number(random_state)
-    #     for i in range(1, len(layers)):
-    #         layer_weight = rng.standard_normal((layers[i - 1], layers[i]))
-    #         layer_bias = np.zeros(layers[i]) # rng.standard_normal
-    #         weights.append(layer_weight)
-    #         bias.append(layer_bias)
+#     def _forward_layer(self, training_array: np.ndarray, weights: list, bias: list) -> Tuple[list, list]:
         
-    #     return weights, bias
+#         train_array = _validate_arrays_perceptron(training_array)
+
+#         z = []
+#         a = [train_array]
+#         for i in range(len(weights)):
+#             z_layer = np.matmul(a[-1], weights[i]) + bias[i]
+#             z.append(z_layer)
+#             a_layer = _sigmoid(z_layer)
+#             a.append(a_layer)
+            
+#         return z, a
+
+#     def _back_propagation(self, z: list, a: list, weights: list, training_targets: np.ndarray) -> Tuple[list, list]:
+
+#         train_targets = _validate_arrays_perceptron(training_targets)
+        
+#         L = len(self.layers) - 1
+#         learning_rate = self.learning_rate
+#         delta = dict()
+#         delta[L] = (a[-1] - train_targets) * derivative_sigmoid(z[-1])
+#         d_weights = []
+#         d_bias = []
+
+#         for i in range(L - 1, 0, -1):
+#             delta[i] = (np.matmul(delta[i + 1], weights[i].T)) * derivative_sigmoid(z[i - 1])
     
+#         for j in range(1, L + 1):
+#             d_weights_layer = learning_rate * np.matmul(a[j - 1].T, delta[j])
+#             d_bias_layer = learning_rate * np.mean(delta[j], axis = 0)
+#             d_weights.append(d_weights_layer)
+#             d_bias.append(d_bias_layer)
+
+#         return d_weights, d_bias
+
+#     def _weight_update(self, weights: list, bias: list, d_weights: list, d_bias: list) -> Tuple[list, list]:
+        
+#         for i in range(len(weights)):
+#                 weights[i] -= d_weights[i]
+#                 bias[i] -= d_bias[i]
+
+#         return weights, bias
+
+#     def fit(self, training_array: np.ndarray, training_targets: np.ndarray, random_state: Optional[int] = None) -> 'multilayer_Perceptron':
+        
+#         train_array = _validate_arrays_perceptron(training_array)
+#         train_targets = _validate_arrays_perceptron(training_targets)
+
+#         weights, bias = self._weight_initialization(random_state = random_state)
+
+#         for _ in range(self.epochs):
+#             z, a = self._forward_layer(train_array, weights, bias)
+#             d_weights, d_bias = self._back_propagation(z, a, weights, train_targets)
+#             weights, bias = self._weight_update(weights, bias, d_weights, d_bias)
+
+#         self.coef_ = weights
+#         self.bias_ = bias
+
+#         return self
+    
+#     def _verify_fit(self) -> 'multilayer_Perceptron':
+#         if self.coef_ is None or self.bias_ is None:
+#             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
+
+#         return self
+    
+#     def predict(self, testing_array: np.ndarray):
+        
+#         # TODO: doctrings/comments
+
+#         self._verify_fit()
+
+#         test_array = _validate_arrays_perceptron(testing_array)
+
+#         if test_array.shape[1] != self.coef_[0].shape[0]:
+#             raise ValueError('Test array must have the same number of input features as coefficients')
+
+#         _, a = self._forward_layer(testing_array, self.coef_, self.bias_)
+
+#         prediction = a[-1]
+
+#         predicted_labels = np.where(prediction > 0.5, 1, 0)
+
+#         return prediction, predicted_labels
 
 # def test_perceptron_fit_basic():
 #     train_array = np.array([[0], [1], [2], [3], [4]])

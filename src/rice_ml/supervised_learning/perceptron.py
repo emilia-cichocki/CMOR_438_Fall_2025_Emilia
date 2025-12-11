@@ -305,3 +305,19 @@ class multilayer_Perceptron():
         predicted_labels = np.where(prediction > 0.5, 1, 0)
 
         return prediction, predicted_labels
+
+# TODO: maybe move this to another section (postprocessing)
+
+    def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike) -> np.ndarray:
+
+        # TODO: be consistent w/ arraylike vs np.ndarray
+
+        predicted_target_array = self.prediction(testing_array)
+        actual_target_array = _1D_vectorized(actual_targets)
+
+        if predicted_target_array.shape != actual_target_array.shape:
+            raise ValueError("Shapes of predicted and actual targets must match")
+        
+        accuracy = np.mean(predicted_target_array == actual_target_array)
+
+        return accuracy
