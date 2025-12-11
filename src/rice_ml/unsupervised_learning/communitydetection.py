@@ -1,5 +1,5 @@
 """
-    Community detection algorithms (NumPy)
+    Community detection algorithms (NetworkX)
 
     This module implements label propagation for community detection.
 

@@ -163,6 +163,8 @@ class k_means():
 
     def prediction(self, testing_array: ArrayLike) -> np.ndarray:
 
+        self._verify_fit()
+
         test_array = _2D_numeric(testing_array)
 
         if test_array.shape[1] != self.n_features_:
@@ -172,7 +174,6 @@ class k_means():
 
         return cluster_predictions
     
-# TODO: maybe add transform?
 
 def _validate_parameters_dbscan(epsilon: float, core_point_min: int) -> None:
 
@@ -219,7 +220,8 @@ class dbscan():
             raise TypeError('Point index must be an integer')
         if point_index < 0:
             raise ValueError('Point index must be non-negative')
-        
+        if point_index >= distances.shape[0]:
+            raise ValueError('Point index is out of range')
         neighbors = np.where(distances[point_index] <= self.epsilon)[0]
         neighbors = neighbors.tolist()
 
