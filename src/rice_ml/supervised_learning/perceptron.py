@@ -214,7 +214,7 @@ class multilayer_Perceptron():
         rng = _random_number(random_state)
         for i in range(1, len(layers)):
             layer_weight = rng.standard_normal((layers[i - 1], layers[i]))
-            layer_bias = np.zeros(layers[i]) # rng.standard_normal
+            layer_bias = np.zeros(layers[i])
             weights.append(layer_weight)
             bias.append(layer_bias)
         
@@ -287,7 +287,7 @@ class multilayer_Perceptron():
 
         return self
     
-    def predict(self, testing_array: np.ndarray):
+    def prediction(self, testing_array: np.ndarray):
         
         # TODO: doctrings/comments
 
@@ -306,18 +306,6 @@ class multilayer_Perceptron():
 
         return prediction, predicted_labels
 
-# TODO: maybe move this to another section (postprocessing)
+# TODO: maybe move scoring to another section (postprocessing)
 
-    def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike) -> np.ndarray:
-
-        # TODO: be consistent w/ arraylike vs np.ndarray
-
-        predicted_target_array = self.prediction(testing_array)
-        actual_target_array = _1D_vectorized(actual_targets)
-
-        if predicted_target_array.shape != actual_target_array.shape:
-            raise ValueError("Shapes of predicted and actual targets must match")
-        
-        accuracy = np.mean(predicted_target_array == actual_target_array)
-
-        return accuracy
+# TODO: account for multiple classes, and in the unit tests as well! account for negatives

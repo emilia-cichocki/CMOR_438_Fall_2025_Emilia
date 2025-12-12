@@ -312,7 +312,6 @@ class logistic_regression():
 
         return self
     
-
     def prediction(self, testing_array: np.ndarray, threshold: float = 0.5) -> np.ndarray:
         
         # TODO: doctrings/comments
