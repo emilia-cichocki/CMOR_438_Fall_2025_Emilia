@@ -67,6 +67,14 @@ def _class_counts(predicted_classes: np.ndarray,
 
 def _plot_confusion(confusion_matrix: np.ndarray, labels: Optional[Sequence] = None, display_value: bool = True) -> None:
     
+    if not isinstance(confusion_matrix, np.ndarray):
+        raise TypeError("Confusion matrix must be an array")
+    confusion_matrix = _2D_numeric(confusion_matrix)
+    if labels is not None and not isinstance(labels, Sequence):
+        raise TypeError("Labels must be a sequence")
+    if not isinstance(display_value, bool):
+        raise TypeError("display_value parameter must be a boolean")
+    
     fig, ax = plt.subplots(figsize = (10, 6))
     im = ax.imshow(confusion_matrix)
     plt.colorbar(im, ax = ax)
@@ -138,6 +146,8 @@ def confusion_matrix(predicted_classes: np.ndarray,
         raise TypeError('Plot parameter must be a boolean')
     
     _, _, _, labels, confusion_matrix = _class_counts(predicted_classes, true_classes, labels)
+    
+    labels = labels.tolist()
 
     if plot:
         _plot_confusion(confusion_matrix, labels, display_values)
@@ -158,7 +168,7 @@ def precision_score(predicted_classes: np.ndarray,
         unique_class = np.unique(np.concatenate([pred_class, true_class]))
         if len(unique_class) != 2:
             raise ValueError("Binary metric requires two classes")
-        positive_class_label = np.max(unique_class)
+        positive_class_label = sorted(unique_class)[-1]
 
         true_positive = np.sum((true_class == positive_class_label) & (pred_class == positive_class_label))
         false_positive = np.sum((true_class != positive_class_label) & (pred_class == positive_class_label))
@@ -168,7 +178,7 @@ def precision_score(predicted_classes: np.ndarray,
             precision = 0.0
         return precision
 
-    true_pos, false_pos, false_neg, labels, _ = _class_counts(pred_class, true_class, labels)
+    true_pos, false_pos, false_neg, labels_out, _ = _class_counts(pred_class, true_class, labels)
 
     if metric == 'micro':
         true_positive = np.sum(true_pos)
@@ -180,7 +190,8 @@ def precision_score(predicted_classes: np.ndarray,
             precision = 0.0
         return precision
     
-    precision_per_class = np.where((true_pos + false_pos) > 0, true_pos / (true_pos + false_pos), 0.0)
+    with np.errstate(divide = "ignore", invalid = "ignore"):
+        precision_per_class = np.where((true_pos + false_pos) > 0, true_pos / (true_pos + false_pos), 0.0)
 
     if metric == 'macro':
         precision = float(np.mean(precision_per_class))
@@ -204,7 +215,7 @@ def recall_score(predicted_classes: np.ndarray,
         
         if len(unique_class) != 2:
             raise ValueError("Binary metric requires two classes")
-        positive_class_label = np.max(unique_class)
+        positive_class_label = sorted(unique_class)[-1]
 
         true_positive = np.sum((true_class == positive_class_label) & (pred_class == positive_class_label))
         false_negative = np.sum((true_class == positive_class_label) & (pred_class != positive_class_label))
@@ -226,7 +237,8 @@ def recall_score(predicted_classes: np.ndarray,
             recall = 0.0
         return recall
     
-    recall_per_class = np.where((true_pos + false_neg) > 0, true_pos / (true_pos + false_neg), 0.0)
+    with np.errstate(divide = "ignore", invalid = "ignore"):
+        recall_per_class = np.where((true_pos + false_neg) > 0, true_pos / (true_pos + false_neg), 0.0)
 
     if metric == 'macro':
         precision = float(np.mean(recall_per_class))
@@ -238,7 +250,7 @@ def recall_score(predicted_classes: np.ndarray,
 def f1_score(predicted_classes: np.ndarray, 
                     true_classes: np.ndarray, 
                     metric: Optional[Literal['binary', 'micro', 'macro']] = 'binary',
-                    labels: Optional[Sequence] = None) -> #Union[float, np.ndarray]:
+                    labels: Optional[Sequence] = None) -> Union[float, np.ndarray]:
     
     pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
 
@@ -264,9 +276,11 @@ def f1_score(predicted_classes: np.ndarray,
         return f1
     
     true_pos, false_pos, false_neg, labels, _ = _class_counts(pred_class, true_class, labels)
-    precision_per_class = np.where((true_pos + false_pos) > 0, true_pos / (true_pos + false_pos), 0.0)
-    recall_per_class = np.where((true_pos + false_neg) > 0, true_pos / (true_pos + false_neg), 0.0)
-    f1_per_class = np.where((precision_per_class + recall_per_class) > 0, float(2 * (precision * recall) / (precision + recall)), 0.0)
+
+    with np.errstate(divide = "ignore", invalid = "ignore"):
+        precision_per_class = np.where((true_pos + false_pos) > 0, true_pos / (true_pos + false_pos), 0.0)
+        recall_per_class = np.where((true_pos + false_neg) > 0, true_pos / (true_pos + false_neg), 0.0)
+        f1_per_class = np.where((precision_per_class + recall_per_class) > 0, (2 * (precision_per_class * recall_per_class) / (precision_per_class + recall_per_class)), 0.0)
 
     if metric == 'macro':
         f1 = float(np.mean(f1_per_class))
@@ -287,10 +301,8 @@ def roc_auc(predicted_scores: np.ndarray, true_classes: np.ndarray) -> float:
     if len(unique_class) != 2:
         raise ValueError("ROC AUC requires two classes")
     
-    order = np.argsort(pred_scores, "mergesort")
-    ranks = np.empty_like(order, dtype = float)
-    ranks[order] = np.arange(1, len(pred_scores) + 1)
-    positive_class_idx = (true_class == unique_class.max())
+    ranks = stats.rankdata(pred_scores, method = "average")
+    positive_class_idx = (true_class == sorted(unique_class)[-1])
     n_positive = np.sum(positive_class_idx)
     n_negative = len(true_class) - n_positive
     sum_ranks_positive = np.sum(ranks[positive_class_idx])
@@ -302,7 +314,7 @@ def log_loss(predicted_scores: np.ndarray, true_classes: np.ndarray, epsilon: fl
 
     # TODO: type hints, docstrings
 
-    true_class, pred_scores, n_classes = _validate_probability(true_classes, predicted_scores)
+    true_class, pred_scores, n_classes = _validate_probability(predicted_scores, true_classes)
 
     if not isinstance(epsilon, (float, int)):
         raise TypeError("Epsilon must be a float or integer")

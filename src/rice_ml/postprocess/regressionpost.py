@@ -13,7 +13,11 @@ from scipy import stats # TODO: finish this!
 from rice_ml.supervised_learning.distances import _ensure_numeric
 
 __all__ = [
-    
+    'mae',
+    'mse',
+    'rmse',
+    'r2'
+    'adjusted_r2'
 ]
 
 def _validate_vector_match(predicted_scores: np.ndarray, true_scores: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -81,6 +85,9 @@ def adjusted_r2(predicted_scores: np.ndarray, true_scores: np.ndarray, n_feature
     pred_scores, true_scores = _validate_vector_match(predicted_scores, true_scores)
 
     n_samples = true_scores.shape[0]
+
+    if n_samples <= n_features + 1:
+        raise ValueError("Number of samples must be greater than number of features + 1 for adjusted R2")
 
     r2_score = r2(pred_scores, true_scores)
 
