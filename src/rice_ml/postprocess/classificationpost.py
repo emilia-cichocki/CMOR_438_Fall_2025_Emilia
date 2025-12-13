@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from rice_ml.preprocess.datatype import *
 from scipy import stats # TODO: finish this!
 from rice_ml.supervised_learning.distances import _ensure_numeric
+import seaborn as sns
 
 __all__ = [
     'accuracy_score',
@@ -20,6 +21,7 @@ __all__ = [
     'f1_score',
     'roc_auc',
     'log_loss',
+    'print_model_metrics'
 ]
 
 def _validate_vector_match(predicted_classes: np.ndarray, true_classes: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -76,7 +78,7 @@ def _plot_confusion(confusion_matrix: np.ndarray, labels: Optional[Sequence] = N
         raise TypeError("display_value parameter must be a boolean")
     
     fig, ax = plt.subplots(figsize = (10, 6))
-    im = ax.imshow(confusion_matrix)
+    im = ax.imshow(confusion_matrix, cmap=sns.light_palette('gray', as_cmap=True))
     plt.colorbar(im, ax = ax)
 
     if labels is not None:
@@ -140,17 +142,21 @@ def confusion_matrix(predicted_classes: np.ndarray,
                      true_classes: np.ndarray, 
                      plot: bool = True, 
                      display_values: bool = True, 
-                     labels: Optional[Sequence] = None) -> np.ndarray:
+                     labels: Optional[Sequence] = None,
+                     conf_matrix_labels: Optional[list] = None,
+                     ) -> np.ndarray:
 
     if not isinstance(plot, bool):
         raise TypeError('Plot parameter must be a boolean')
+    if not isinstance(conf_matrix_labels, list):
+        raise TypeError('Confusion matrix labels must be a list')
     
     _, _, _, labels, confusion_matrix = _class_counts(predicted_classes, true_classes, labels)
     
     labels = labels.tolist()
 
     if plot:
-        _plot_confusion(confusion_matrix, labels, display_values)
+        _plot_confusion(confusion_matrix, conf_matrix_labels, display_values)
     
     return confusion_matrix
 
@@ -306,7 +312,7 @@ def roc_auc(predicted_scores: np.ndarray, true_classes: np.ndarray) -> float:
     n_positive = np.sum(positive_class_idx)
     n_negative = len(true_class) - n_positive
     sum_ranks_positive = np.sum(ranks[positive_class_idx])
-    auc = float((sum_ranks_positive - n_positive * (n_negative + 1) / 2.0) / (n_positive * n_negative))
+    auc = float((sum_ranks_positive - n_positive * (n_positive + 1) / 2.0) / (n_positive * n_negative))
 
     return auc
 
@@ -346,3 +352,18 @@ def log_loss(predicted_scores: np.ndarray, true_classes: np.ndarray, epsilon: fl
     log_loss_mean = float(np.mean(log_loss))
 
     return log_loss_mean
+
+# TODO: unit tests for this
+def print_model_metrics(predicted_classes: np.ndarray, true_classes: np.ndarray) -> None:
+    
+    pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
+
+    print(f"Model Metrics \n\
+{'-' *13} \n\
+Accuracy: {accuracy_score(pred_class, true_class):.2f} \n\
+Precision (Micro): {precision_score(pred_class, true_class, 'micro'):.2f} \n\
+Precision (Macro): {precision_score(pred_class, true_class, 'macro'):.2f} \n\
+Recall (Micro): {recall_score(pred_class, true_class, 'micro'):.2f} \n\
+Recall (Macro): {recall_score(pred_class, true_class, 'macro'):.2f} \n\
+F1 (Micro): {f1_score(pred_class, true_class, 'micro'):.2f} \n\
+F1 (Macro): {f1_score(pred_class, true_class, 'macro'):.2f}")

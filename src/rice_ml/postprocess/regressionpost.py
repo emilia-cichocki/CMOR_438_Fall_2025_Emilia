@@ -16,8 +16,9 @@ __all__ = [
     'mae',
     'mse',
     'rmse',
-    'r2'
-    'adjusted_r2'
+    'r2',
+    'adjusted_r2',
+    'print_model_metrics'
 ]
 
 def _validate_vector_match(predicted_scores: np.ndarray, true_scores: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -95,3 +96,15 @@ def adjusted_r2(predicted_scores: np.ndarray, true_scores: np.ndarray, n_feature
 
     return adjusted_r2_score
 
+
+def print_model_metrics(predicted_scores: np.ndarray, true_scores: np.ndarray, n_features: int = 1) -> None:
+    
+    pred_score, true_score = _validate_vector_match(predicted_scores, true_scores)
+
+    print(f"Model Metrics \n\
+{'-' *13} \n\
+MAE: {mae(pred_score, true_score):.2f} \n\
+MSE: {mse(pred_score, true_score):.2f} \n\
+RMSE: {rmse(pred_score, true_score):.2f} \n\
+R2: {r2(pred_score, true_score):.2f} \n\
+Adjusted R2: {adjusted_r2(pred_score, true_score, n_features):.2f}")

@@ -33,7 +33,7 @@ ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.Dat
 
 # TODO: fix the general formatting to make it consistent across functions (newlines, etc.), account for all nan columns (in unit tests as well)
 
-def missing_data(data_array: ArrayLike, strategy: str) -> np.array:
+def missing_data(data_array: ArrayLike, strategy: Literal['drop', 'mean', 'median', 'mode']) -> np.array:
 
     # TODO: type hints, docstring, explanation of strategies, add workaround for all unique values in mode (and add to unit tests)
 
@@ -65,7 +65,7 @@ def missing_data(data_array: ArrayLike, strategy: str) -> np.array:
 
     return cleaned_array
 
-def outlier_identify(data_array: ArrayLike, method: str, *, drop: bool = False, threshold: float = 3) -> np.array:
+def outlier_identify(data_array: ArrayLike, method: Literal['IQR', 'zscore'], *, drop: bool = False, threshold: float = 3) -> np.array:
 
     # TODO: type hints, docstring, explanation of strategies, option to print outliers/indicate (?)
 

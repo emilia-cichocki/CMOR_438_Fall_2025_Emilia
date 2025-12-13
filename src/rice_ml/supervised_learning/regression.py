@@ -269,6 +269,7 @@ class logistic_regression():
         self.coef_: Optional[np.ndarray] = None
         self.bias_: Optional[float] = None
         self.class_mapping_: Optional[dict] = None
+        self.loss_: Optional[list] = None # TODO - unit tests?
     
     def fit(self, training_array: np.ndarray, training_targets: np.ndarray, random_state: Optional[int] = None, shuffle: bool = True) -> 'logistic_regression':
         
@@ -288,6 +289,8 @@ class logistic_regression():
         train_array = np.hstack([np.ones((train_array.shape[0], 1)), train_array])
         weights = rng.standard_normal(train_array.shape[1]).reshape(-1)
         
+        self.loss_ = []
+
         for iteration in range(self.epochs):
             if shuffle:
                 indices = rng.permutation(train_array.shape[0])
@@ -300,7 +303,11 @@ class logistic_regression():
                 z = _sigmoid(np.matmul(x, weights))
                 error = z - y
                 weights -= learn_rate * error * x
-            
+
+            pred = _sigmoid(np.matmul(train_array, weights))
+            loss = -np.mean(train_targets * np.log(pred + 1e-15) + (1 - train_targets) * np.log(1 - pred + 1e-15))
+            self.loss_.append(loss)
+        
         self.bias_ = weights[0]
         self.coef_ = weights[1:]
 
@@ -336,6 +343,25 @@ class logistic_regression():
         classification = np.array([self.class_mapping_[prediction] for prediction in prediction_prob])
 
         return classification
+    
+    def predict_proba(self, testing_array: np.ndarray) -> np.ndarray:
+        
+        # TODO: doctrings/comments
+
+        self._verify_fit()
+
+        test_array = _validate_arrays_logistic(testing_array)
+        
+        coef_array = _1D_vectorized(self.coef_) # TODO: fix this!
+
+        if test_array.shape[1] != len(coef_array):
+            raise ValueError('Test array must have the same number of input features as coefficients')
+        
+        bias = self.bias_
+
+        prediction_value = _sigmoid(np.matmul(test_array, coef_array) + bias)
+
+        return prediction_value
     
     def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike, threshold: float = 0.5) -> np.ndarray:
 

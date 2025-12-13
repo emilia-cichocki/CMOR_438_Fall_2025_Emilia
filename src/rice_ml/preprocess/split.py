@@ -60,7 +60,7 @@ def _stratified_indices(data: np.ndarray,
                         rng: np.random.Generator, 
                         *, 
                         validation: bool = False,
-                        val_size: Optional[float] = None) -> Union[Tuple[np.array, np.array],Tuple[np.array, np.array, np.array]]:
+                        val_size: Optional[float] = None) -> Union[Tuple[np.array, np.array], Tuple[np.array, np.array, np.array]]:
 
     # TODO: docstrings/type hints, examples
 

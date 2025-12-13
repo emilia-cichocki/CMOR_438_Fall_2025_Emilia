@@ -190,6 +190,9 @@ class decision_tree():
         
         best_feature, best_threshold = self._best_split(train_array, train_targets)
 
+        if best_feature is None or best_threshold is None:
+            return Node(value = self._leaf_value(train_targets))
+        
         left_indices = train_array[:, best_feature] <= best_threshold
         right_indices = train_array[:, best_feature] > best_threshold
         
@@ -360,7 +363,7 @@ class regression_tree():
         return regression
     
     def _build_tree(self, training_array: ArrayLike, training_targets: ArrayLike, depth: int) -> Node:
-
+        
         train_array = _2D_numeric(training_array)
         train_targets = _ensure_numeric(training_targets)
 
@@ -377,6 +380,9 @@ class regression_tree():
         
         best_feature, best_threshold = self._best_split(train_array, train_targets)
 
+        if best_feature is None or best_threshold is None:
+            return Node(value = self._leaf_value(train_targets))
+        
         left_indices = train_array[:, best_feature] <= best_threshold
         right_indices = train_array[:, best_feature] > best_threshold
         
@@ -389,7 +395,7 @@ class regression_tree():
         return Node(feature_index = best_feature, threshold_value = best_threshold, left = left_child, right = right_child)
     
     def fit(self, training_array: ArrayLike, training_targets: ArrayLike) -> "regression_tree":
-        
+
         train_targets = _ensure_numeric(training_targets)
         train_array = _2D_numeric(training_array)
         self._n_features = train_array.shape[1]

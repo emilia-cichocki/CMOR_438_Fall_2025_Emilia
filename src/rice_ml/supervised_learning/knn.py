@@ -23,7 +23,7 @@
     ---------
     _knn_foundation
         Provides the base structure for KNN (fitting the model and implementing the algorithm)
-    knn_classifier
+    knn_classification
         Runs the KNN algorithm for classification
     knn_regressor
         Runs the KNN algorithm for regression
@@ -40,7 +40,7 @@ from rice_ml.preprocess.split import *
 from rice_ml.supervised_learning.distances import _ensure_numeric, euclidean_distance, manhattan_distance, minkowski_distance
 
 __all__ = [
-    'knn_classifier',
+    'knn_classification',
     'knn_regressor',
 ]
 
