@@ -29,7 +29,7 @@
         Runs the KNN algorithm for regression
 """
 
-# TODO: finish editing the above description, add examples, and add a tiebreaker ability/warning for when k is even
+# TODO: finish editing the above description, add examples
 
 import numpy as np
 import pandas as pd

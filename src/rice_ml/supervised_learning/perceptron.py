@@ -106,6 +106,7 @@ class Perceptron():
         self.coef_: Optional[np.ndarray] = None
         self.bias_: Optional[float] = None
         self.class_mapping_: Optional[dict] = None
+        self.error_: Optional[list] = None
     
     def fit(self, training_array: np.ndarray, training_targets: np.ndarray, random_state: Optional[int] = None, shuffle: bool = True) -> 'Perceptron':
         
@@ -125,7 +126,11 @@ class Perceptron():
         train_array = np.hstack([np.ones((train_array.shape[0], 1)), train_array])
         weights = rng.normal(loc=0, scale=0.01, size=train_array.shape[1]).reshape(-1)
         
+        self.error_ = []
+
         for iteration in range(self.epochs):
+            errors = 0
+
             if shuffle:
                 indices = rng.permutation(train_array.shape[0])
             else:
@@ -136,7 +141,13 @@ class Perceptron():
                 learn_rate = self.learning_rate
                 y_hat = _activation_function(np.matmul(x, weights))
                 error = y_hat - y
+
+                if error != 0:
+                    errors += 1
+
                 weights -= learn_rate * error * x
+            
+            self.error_.append(errors)
         
         self.bias_ = weights[0]
         self.coef_ = weights[1:]
@@ -169,6 +180,7 @@ class Perceptron():
         classification = np.array([self.class_mapping_[int(prediction)] for prediction in prediction_value])
 
         return classification
+    
     
     def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike) -> np.ndarray:
 
@@ -204,8 +216,10 @@ class multilayer_Perceptron():
         self.layers = layers
         self.epochs = epochs
         self.learning_rate = learning_rate
+        self.error_: list = []
         self.coef_: Optional[list] = None
         self.bias_: Optional[list] = None
+        self.classes_: Optional[np.ndarray] = None
 
     def _weight_initialization(self, random_state: Optional[int] = None) -> Tuple[list, list]:
         layers = self.layers
@@ -268,6 +282,26 @@ class multilayer_Perceptron():
         
         train_array = _validate_arrays_perceptron(training_array)
         train_targets = _validate_arrays_perceptron(training_targets)
+        
+        self.classes_, encoded = np.unique(train_targets, return_inverse=True)
+        n_classes = len(self.classes_)
+
+        if train_targets.ndim == 1 or (train_targets.ndim == 2 and train_targets.shape[1] == 1):
+            
+            self.classes_, encoded = np.unique(train_targets, return_inverse=True)
+            n_classes = len(self.classes_)
+            
+            if self.layers[-1] == 1:
+                    if n_classes > 2:
+                        raise ValueError(f"Single output neuron must have binary 2 classes, got {n_classes}")
+                    train_targets = encoded.reshape(-1, 1)
+
+            else:
+                y = np.zeros((training_targets.shape[0], n_classes))
+                y[np.arange(training_targets.shape[0]), encoded] = 1
+                training_targets = y
+        
+        self.error_ = []
 
         weights, bias = self._weight_initialization(random_state = random_state)
 
@@ -275,6 +309,16 @@ class multilayer_Perceptron():
             z, a = self._forward_layer(train_array, weights, bias)
             d_weights, d_bias = self._back_propagation(z, a, weights, train_targets)
             weights, bias = self._weight_update(weights, bias, d_weights, d_bias)
+
+            pred_probs = a[-1]
+
+            if self.layers[-1] == 1:
+                pred_labels = (pred_probs > 0.5).astype(int)
+            else:
+                pred_labels = (pred_probs > 0.5).astype(int)
+
+            error = np.sum(pred_labels != train_targets)
+            self.error_.append(error)
 
         self.coef_ = weights
         self.bias_ = bias
@@ -287,7 +331,7 @@ class multilayer_Perceptron():
 
         return self
     
-    def prediction(self, testing_array: np.ndarray):
+    def prediction(self, testing_array: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         
         # TODO: doctrings/comments
 
@@ -302,7 +346,13 @@ class multilayer_Perceptron():
 
         prediction = a[-1]
 
-        predicted_labels = np.where(prediction > 0.5, 1, 0)
+        if self.layers[-1] == 1:
+            prediction = prediction.reshape(-1, 1)
+            prediction = np.hstack([1 - prediction, prediction])
+            predicted_labels = (prediction[:, 1] > 0.5).astype(int).reshape(-1, 1)
+        
+        else:
+            predicted_labels = np.where(prediction > 0.5, 1, 0)
 
         return prediction, predicted_labels
 

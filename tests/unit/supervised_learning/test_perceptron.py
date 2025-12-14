@@ -1041,7 +1041,7 @@ def test_mlp_fit_mixed():
 def test_mlp_fit_nonbinary():
     train_array = np.array([[0], [1], [2], [3], [4]])
     train_targets = np.array([[-1], [-1], [1], [1], [2]])
-    mlp = multilayer_Perceptron(layers = [1, 2, 1], epochs = 1000, learning_rate = 0.01)
+    mlp = multilayer_Perceptron(layers = [1, 2, 3], epochs = 1000, learning_rate = 0.01)
     mlp.fit(train_array, train_targets)
     assert isinstance(mlp.coef_, list)
     assert isinstance(mlp.bias_, list)
@@ -1155,7 +1155,7 @@ def test_mlp_prediction_basic():
     raw_pred, class_pred = mlp.prediction(test_array)
     assert isinstance(raw_pred, np.ndarray) 
     assert isinstance(class_pred, np.ndarray) 
-    assert raw_pred.shape == (2, 1)
+    assert raw_pred.shape == (2, 2)
     assert class_pred.shape == (2, 1)
     assert np.array_equal(class_pred, np.array([[1], [1]]))
 
@@ -1179,7 +1179,7 @@ def test_mlp_prediction_strings():
     with pytest.raises(TypeError):
         mlp.fit(train_array, train_targets)
 
-def test_perceptron_prediction_mult_feat():
+def test_mlp_prediction_mult_feat():
     train_array = np.array([
                            [1, 1],
                            [2, 0],
@@ -1194,7 +1194,7 @@ def test_perceptron_prediction_mult_feat():
     raw_pred, class_pred = mlp.prediction(test_array)
     assert isinstance(raw_pred, np.ndarray) 
     assert isinstance(class_pred, np.ndarray) 
-    assert raw_pred.shape == (2, 1)
+    assert raw_pred.shape == (2, 2)
     assert class_pred.shape == (2, 1)
     assert np.array_equal(class_pred, np.array([[0], [1]]))
 

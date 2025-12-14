@@ -55,6 +55,7 @@ class label_propagation():
         self.max_iter = max_iter
         self.random_state = random_state
         self.labels: Dict[Hashable, Hashable] = {node: node for node in self.graph.nodes}
+        self.rng: Generator = _random_number(random_state)
         self.fit_: bool = False
 
     def _label_updates(self, 
@@ -64,9 +65,7 @@ class label_propagation():
             hash(node)
         except TypeError:
             raise TypeError(f"Input for node ({node}) is not hashable")
-        
-        rng = _random_number(self.random_state)
-        
+                
         frequency_counts = defaultdict(int)
         for neighbor in list(self.graph.neighbors(node)):
             frequency_counts[self.labels[neighbor]] += 1
@@ -76,7 +75,7 @@ class label_propagation():
         
         maximum_count = max(frequency_counts.values())
         tied_labels = [label for label, count in frequency_counts.items() if count == maximum_count]
-        tiebreaker = rng.choice(tied_labels)
+        tiebreaker = self.rng.choice(tied_labels)
 
         return tiebreaker
     
@@ -84,13 +83,11 @@ class label_propagation():
 
         # TODO: type hints/docstrings - the dictionary is node, label
 
-        rng = _random_number(self.random_state)
-
         for _ in range(self.max_iter):
 
             changed = False
 
-            shuffled_nodes = rng.permutation(list(self.graph.nodes()))
+            shuffled_nodes = self.rng.permutation(list(self.graph.nodes()))
 
             for node in shuffled_nodes:
                 new_label = self._label_updates(node)

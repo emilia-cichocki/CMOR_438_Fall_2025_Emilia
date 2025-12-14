@@ -46,7 +46,7 @@ def _validate_parameters(method: Literal['normal', 'gradient_descent'] = None,
     if learning_rate is not None and learning_rate <= 0:
         warnings.warn(f"For model to learn properly, learning rate should be greater than zero", UserWarning)
     if epochs is not None and not isinstance(epochs, int):
-        raise TypeError('Maximum epochs must be a float')
+        raise TypeError('Maximum epochs must be an integer')
     if epochs is not None and epochs <= 0:
         raise ValueError('Maximum epochs must be greater than zero')
     if not isinstance(fit_intercept, bool):
@@ -149,6 +149,7 @@ class linear_regression:
         self.epochs = epochs
         self.coef_: Optional[np.ndarray] = None
         self.intercept_: Optional[np.ndarray] = None
+        self.error_: Optional[list] = None
         self._training_array: Optional[np.ndarray] = None
         self._training_targets: Optional[np.ndarray] = None
 
@@ -176,6 +177,7 @@ class linear_regression:
                 raise ValueError("Matrix is singular and normal equation cannot be solved; try stochastic gradient descent instead")
 
         elif self.method == 'gradient_descent':
+            self.error_ = []
             rng = _random_number(random_state)
             if self.fit_intercept:
                 weights = rng.standard_normal(training_array.shape[1] + 1).reshape(-1)
@@ -190,7 +192,11 @@ class linear_regression:
                 for entry in indices:
                     error = np.matmul(train_array[entry], weights) - train_targets[entry]
                     weights -= self.learning_rate * error * train_array[entry]
-            
+                
+                predictions = np.matmul(train_array, weights)
+                mse = np.mean((predictions - train_targets) ** 2)
+                self.error_.append(mse)
+
         if self.fit_intercept:
             self.intercept_ = weights[0]
             self.coef_ = weights[1:]
