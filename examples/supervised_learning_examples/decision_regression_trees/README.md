@@ -12,9 +12,9 @@ The criteria used to split a node is found by determining the threshold value ac
 ### Decision Trees
 Decision trees produce splits by attempting to maximize the information gain through minimizing the weighted mean entropy of the child nodes. Entropy is defined as 
 
-<p align="center">
-  $E = - \sum_{i=1}^{C} p_i \, \log_2(p_i)$
-</p>
+$$
+E = - \sum_{i=1}^{C} p_i \, \log_2(p_i)
+$$
 
 where $p_i$ is the proportion of samples belonging to a given class out of $C$ classes, and is a measure of the impurity of a node; nodes that contain only samples of a single class have an entropy of zero, while high entropy is indicative of samples from many different classes. Information gain is then calculated as 
 
@@ -28,16 +28,19 @@ Decision trees are able to classify test points by following the flowchart-like 
 
 ### Regression Trees
 Regression trees produce splits by attempting to maximize variance reduction through minimizing the variance of target values in the child nodes. Variance is defined as
+
 $$
 V = \frac{1}{n} \sum_{i=1}^{n} \big(y_i - \bar{y}\big)^2
 $$
+
 where $y_i$ is the target value for a sample and $\bar{y}$ is the mean target values across all samples. Variance reduction is then calculated as 
+
 $$
-\Delta \text{Var} = V_\text{parent}
--
+\Delta \text{Var} = V_\text{parent} -
 \sum_{j \in \{\text{left}, \text{right}\}} 
 \frac{n_j}{n_\text{parent}} \sum_{i \in j} (y_i - \bar{y}_j)^2
 $$
+
 where $n_\text{parent}$ is the number of samples in the parent node and $n_j$ the number of samples in either the left or right node.
 
 The process for developing a regression tree is analogous to that of a decision tree, but the optimal feature-threshold combination is chosen by maximizing variance reduction (minimizing variance) rather than maximizing information gain. For each leaf node, the target value is calculated by averaging the values for each sample in the leaf.
@@ -64,40 +67,55 @@ Decision and regression trees can be evaluated with either standard classificati
 For classification, the following metrics are used:
 1. *Accuracy*: Proportion of predictions that match true labels
 2. *Precision*: Measure of how many positive predictions for a class are true positives (TP) compared to false positives (FP)
+
 $$
 P = \frac{TP}{TP + FP}
 $$
+
 3. *Recall*: Measure of how many positive instances for a class are predicted (TP) compared to false negatives (FN)
+
 $$
 R = \frac{TP}{TP + FN}
 $$
+
 4. *F1 Score*: Combination of precision and recall
+
 $$
 F_1 = 2 \cdot \frac{\text{P} \cdot \text{R}}{\text{P} + \text{R}}
 $$
+
 5. *Confusion Matrix*: Visualization of true versus predicted labels for each class
 
 Precision, recall, and F1 can be calculated as a micro or macro average. The micro-average of precision or recall is calculated by summing the total number of true positives, false positives, and false negatives for a single calculation. The macro-average is calculated by averaging the value of the metric for each class present in the data. The micro F1 score is calculated using the micro precision and recall scores, while the macro F1 score is the average of the F1 score for each class. Thus, micro scores are heavily biased from the majority class, while macro scores provide information on the overall model ability with equal class weightings.
 
 For regression, the following metrics are used:
 1. *Mean Absolute Error (MAE)*: Measure of the mean absolute difference between predicted ($\hat{y}$) and true ($y_i$) values
+
 $$
 \mathrm{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
 $$
+
 2. *Mean Squared Error (MSE)*: Measure of the mean squared difference between predicted and true
+
 $$
 \mathrm{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
 $$
+
 3. *Root Mean Squared Error (RMSE)*: Square root of MSE
+
 $$
 \mathrm{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 $$
+
 4. *Coefficient of Determination (R2)*: Goodness-of-fit metric that measures explained variance
+
 $$
 R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 {\sum_{i=1}^{n} (y_i - \bar{y})^2}
 $$
+
 5. *Adjusted R2*: Calculation of R2 that accounts for feature number to penalize unnecessary additions
+
 $$
 R^2_{\text{adj}} =
 1 - \left(1 - R^2\right)
@@ -117,7 +135,7 @@ Decision and regression trees are implemented using the custom `decision_tree` a
     - *predict*: predicts the class of each sample
     - *print_tree*: prints a visualization of the decision tree
 
-2. **Regression Trees**:
+2. **Regression Tree**:
 - Implements a standard regression tree algorithm using variance reduction
 - Hyperparameters:
     - *max_depth*: the maximum depth of the tree
