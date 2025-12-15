@@ -273,8 +273,8 @@ class multilayer_Perceptron():
     def _weight_update(self, weights: list, bias: list, d_weights: list, d_bias: list) -> Tuple[list, list]:
         
         for i in range(len(weights)):
-                weights[i] -= d_weights[i]
-                bias[i] -= d_bias[i]
+            weights[i] -= d_weights[i]
+            bias[i] -= d_bias[i]
 
         return weights, bias
 

@@ -10,7 +10,7 @@ Bagging as an ensemble method relies on the generation of bootstrapped data. Boo
 ## Random Forest
 Random forest algorithms are a type of ensemble method used in supervised learning for either classification or regression. Random forests are built on combinations of decision or regression trees, each of which is trained on a bootstrapped sample of data and a randomized feature subset.
 
-A random forest model with $N$ trees creates $N$ sets of bootstrapped data from the original training data, and trains each tree on a set (for details on decision/regression trees, see [this README](../decisiontrees/README.md)). For random forest classifiers, decision trees are used; for random forest regressors, regression trees are used. In addition to bootstrapping data, random forest models introduce an additional element of randomness through selecting only a subset of features to be used for training in each tree. These are chosen randomly out of the total set of features, where the size of the subset can be user-specified (typically the square root or log2 of the total number of features).
+A random forest model with $N$ trees creates $N$ sets of bootstrapped data from the original training data, and trains each tree on a set (for details on decision/regression trees, see [this README](../decision_regression_trees/README.md)). For random forest classifiers, decision trees are used; for random forest regressors, regression trees are used. In addition to bootstrapping data, random forest models introduce an additional element of randomness through selecting only a subset of features to be used for training in each tree. These are chosen randomly out of the total set of features, where the size of the subset can be user-specified (typically the square root or log2 of the total number of features).
 
 For a given test sample, the random forest algorithm works by obtaining a label (classification) or target value (regression) from each tree in the model. For a random forest classifier, the final label is chosen by taking the majority predicted label across trees. For a random forest regressor, the final target value is the average of the predicted value from each tree.
 
@@ -89,7 +89,7 @@ Random forest models are implemented using the custom `random_forest` class from
     - *max_features*: specifies the maximum number of features each tree is trained on (positive integer, 'sqrt', 'log2')
     - *random_state*: random state used in generation of bootstrapped data and feature selection
 - Methods:
-    - *fit*: fits the model on the training data and labels
+    - *fit*: fits the model on the training data and labels or target values
     - *predict*: predicts the class or target value of each sample
 
 ## Data Used

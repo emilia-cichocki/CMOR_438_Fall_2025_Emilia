@@ -55,7 +55,7 @@ def silhouette_score(data_array: np.ndarray, label_array: np.ndarray, ignore_noi
 
         if np.sum(self_mask) > 1:
             same_mask = (label_array == label_array[i])
-            same_mask[i] = False  # remove self
+            same_mask[i] = False
             if np.any(same_mask):
                 same_dist = np.mean(np.linalg.norm(data_array[i] - data_array[same_mask], axis=1))
             else:

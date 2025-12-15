@@ -67,10 +67,9 @@ class k_means():
         self.inertia_: Optional[float] = None
         self.n_features_: Optional[int] = None
         
-
     def _initial_centroids(self, training_array: np.ndarray) -> np.ndarray:
 
-        train_array = _2D_numeric(training_array) # TODO: move this so it isn't redundant
+        train_array = _2D_numeric(training_array)
         rng = _random_number(self.random_state)
         centroid_indices = rng.choice(train_array.shape[0], self.n_clusters, replace = False)
         initial_centroids = train_array[centroid_indices]

@@ -195,6 +195,7 @@ class linear_regression:
                 
                 predictions = np.matmul(train_array, weights)
                 mse = np.mean((predictions - train_targets) ** 2)
+                
                 self.error_.append(mse)
 
         if self.fit_intercept:
