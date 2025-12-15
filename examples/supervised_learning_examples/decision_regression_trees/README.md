@@ -11,13 +11,13 @@ The criteria used to split a node is found by determining the threshold value ac
 
 ### Decision Trees
 Decision trees produce splits by attempting to maximize the information gain through minimizing the weighted mean entropy of the child nodes. Entropy is defined as 
-$$
-E = - \sum_{i=1}^{C} p_i \, \log_2(p_i)
-$$
+
+<p align="center">
+  $E = - \sum_{i=1}^{C} p_i \, \log_2(p_i)$
+</p>
+
 where $p_i$ is the proportion of samples belonging to a given class out of $C$ classes, and is a measure of the impurity of a node; nodes that contain only samples of a single class have an entropy of zero, while high entropy is indicative of samples from many different classes. Information gain is then calculated as 
-$$
-I = E_\text{parent} - \sum_{j \in \text{children}} \frac{S_j}{S} \, E_j
-$$
+
 where $E_\text{parent}$ is the entropy of the parent node, $S_j$ is the number of samples in a given child node, $S$ is the number of samples in the parent node, and $E_j$ is the entropy for a child node.
 
 For each node in a decision tree, possible thresholds across all features are calculated by finding the midpoints between consecutive unique values of a feature. For each possibility, samples are split based on whether they are less than or equal to (left node) or greater than (right node) the threshold. The information gain for the resulting split is then calculated, and the feature-threshold combination that maximizes information gain is selected. A node is considered a leaf node if it contains only samples of the same class, if no split is able to improve information gain over the parent node, or if it contains fewer samples than are required for a further split.
