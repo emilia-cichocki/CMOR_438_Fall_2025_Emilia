@@ -405,6 +405,8 @@ class _knn_foundation:
         ------
         ValueError
             If query data has a different number of features than training data
+        RuntimeError
+            If the model has not been fitted
         """
     
         query_array = _2D_numeric(query_data)

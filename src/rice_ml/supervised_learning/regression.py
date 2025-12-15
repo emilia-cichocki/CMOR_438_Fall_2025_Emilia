@@ -311,10 +311,10 @@ class linear_regression:
 
         Parameters
         ----------
-        training_array: ArrayLike
-            2D array-like object containing training data
-        training_targets: ArrayLike
-            1D array-like object containing target values
+        training_array: np.ndarray
+            2D array containing training data
+        training_targets: np.ndarray
+            1D array containing target values
         random_state: int, optional
             Random state for shuffling data using a random generator; if
             None, a randomized seed is used (gradient descent)
@@ -557,10 +557,10 @@ class logistic_regression():
 
         Parameters
         ----------
-        training_array: ArrayLike
-            2D array-like object containing training data
-        training_targets: ArrayLike
-            2D array-like object containing training labels
+        training_array: np.ndarray
+            2D array containing training data
+        training_targets: np.ndarray
+            2D array containing training labels
         random_state: int, optional
             Random state for shuffling data using a random generator; if
             None, a randomized seed is used
