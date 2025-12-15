@@ -118,6 +118,18 @@ class random_forest():
         Fits the random forest based on training labels and numeric data
     prediction(testing_array):
         Predicts the labels for a set of testing data
+    
+    Examples
+    --------
+    >>> X = np.array([[0, 0], [1, 1], [1, 0], [0, 1]])
+    >>> y = np.array([0, 1, 1, 0])
+    >>> model = random_forest(n_trees=3, task='classification', max_depth=2, random_state=42)
+    >>> _ = model.fit(X, y)
+    >>> preds = model.prediction(X)
+    >>> preds.shape
+    (4,)
+    >>> set(preds)
+    {0, 1}
     """
 
     def __init__(self,

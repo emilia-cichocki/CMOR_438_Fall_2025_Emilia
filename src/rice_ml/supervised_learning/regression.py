@@ -1,19 +1,20 @@
 """
     Regression algorithms (NumPy)
 
-    This module implements several regression algorithms (ordinary least squares linear and logistic) on 
-    numeric NumPy arrays. It supports both gradient descent and direct calculation through the normal equation (linear regression).
-
-    Functions
-    ---------
-    
+    This module implements several regression algorithms (linear and logistic) on 
+    numeric NumPy arrays. It supports both gradient descent with mean-squared error (linear)
+    or binary cross-entropy loss with sigmoid activation (logistic), and direct calculation 
+    through the normal equation (linear).
 
     Classes
     ---------
-   
+    linear_regression
+        Implements linear regression using either the normal equation or stochastic gradient
+        descent with mean-squared error
+    logistic_regression
+        Implements logistic regression using stochastic gradient descent with a
+        sigmoid activation function
 """
-
-# TODO: finish above!
 
 __all__ = [
     'linear_regression',
@@ -30,14 +31,33 @@ from rice_ml.supervised_learning.distances import _ensure_numeric
 
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
-
 def _validate_parameters(method: Literal['normal', 'gradient_descent'] = None,
                          learning_rate: Optional[float] = None,
                          epochs: Optional[int] = None,
                          fit_intercept: bool = True, 
                          ) -> None:
 
-    # TODO: add docstrings, potentially add functionality for collecting/graphing error counts
+    """
+    Validates hyperparameters for regression
+
+    Parameters
+    ----------
+    method: {'normal', 'gradient_descent'}
+        Selection of method for linear regression
+    learning_rate: float, optional
+        Learning rate for the model
+    epochs: int, optional
+        Maximum number of epochs
+    fit_intercept: boolean, default = True
+        Whether to fit a model intercept
+
+    Raises
+    ------
+    TypeError
+        If parameters are not of valid types
+    ValueError
+        If parameters do not have appropriate values
+    """
 
     if method is not None and method not in ('normal', 'gradient_descent'):
         raise ValueError(f"Regression method must be one of {['normal', 'gradient_descent']}")
@@ -60,7 +80,37 @@ def _validate_arrays(data_array: Optional[ArrayLike] = None,
                      target_vector: Optional[ArrayLike] = None
                      ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
 
-    # TODO: add docstrings
+    """
+    Ensures that data array is 2D and contain only numeric data,
+    target vectors are 1D (or can be reshaped to 1D), and that the 
+    shape of feature data and target values match for linear regression
+
+    Parameters
+    ----------
+    data_array: ArrayLike, optional
+        2D data array containing numeric feature values
+    target_vector: ArrayLike, optional
+        1D vector containing target values
+
+    Returns
+    -------
+    array: np.ndarray (if `data_array` is not None)
+        2D validated feature array
+    vector: np.ndarray (if `target_vector` is not None)
+        1D validated target value vector
+
+    Raises
+    ------
+    ValueError
+        If either input array contains NaN values, or the shapes of the two 
+        input arrays do not match
+
+    Examples
+    --------
+    >>> _validate_arrays([[1, 2], [3, 4]])
+    array([[1., 2.],
+           [3., 4.]])
+    """
 
     if data_array is not None:
         array = _2D_numeric(data_array, 'data_array')
@@ -90,7 +140,39 @@ def _validate_arrays_logistic(data_array: Optional[ArrayLike] = None,
                               target_vector: Optional[ArrayLike] = None
                               ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
 
-    # TODO: add docstrings
+    """
+    Ensures that data array is 2D and contain only numeric data,
+    target vectors are 1D (or can be reshaped to 1D) and only contains two
+    targets, and that the shape of feature data and target values match
+    for logistic regression in binary classification
+
+    Parameters
+    ----------
+    data_array: ArrayLike, optional
+        2D data array containing numeric feature values
+    target_vector: ArrayLike, optional
+        1D vector containing class labels
+
+    Returns
+    -------
+    array: np.ndarray (if `data_array` is not None)
+        2D validated feature array
+    vector: np.ndarray (if `target_vector` is not None)
+        1D validated target class labels
+
+    Raises
+    ------
+    ValueError
+        If either input array contains NaN values, the shapes of the two 
+        input arrays do not match, or the target labels contain more than
+        two classes
+
+    Examples
+    --------
+    >>> _validate_arrays_logistic([[1, 2], [3, 4]])
+    array([[1., 2.],
+           [3., 4.]])
+    """
 
     if data_array is not None:
         array = _2D_numeric(data_array, 'data_array')
@@ -123,14 +205,63 @@ def _validate_arrays_logistic(data_array: Optional[ArrayLike] = None,
     
 def _sigmoid(z):
     
-    # TODO: add unit tests?
+    """
+    Calculates the sigmoid activation function
+    """
 
     return 1.0/(1.0 + np.exp(-z))
 
 
 class linear_regression:
 
-    # TODO: docstrings, explanation
+    """
+    Implements linear regression using either the normal equation
+    or stochastic gradient descent
+
+    Attributes
+    ----------
+    method: {'normal, 'gradient_descent'}
+        Method for performing linear regression
+    fit_intercept: bool
+        Whether the model fits an intercept
+    learning_rate: float, optional
+        Learning rate for the model
+    epochs: int, optional
+        Maximum number of epochs
+    coef_: np.ndarray, optional
+        Weight matrix corresponding to each feature, representing
+        coefficients in the model
+    intercept_: np.ndarray
+        Intercept term for the model
+    error_: list
+        Stores the error for the model over time
+    _training_array: np.ndarray
+        Stores the training data array
+    _training_targets: np.ndarray
+        Stores the training target values
+
+    Methods
+    -------
+    fit(training_array, training_targets, random_state, shuffle):
+        Fits the linear regression based on training targets and numeric data
+    prediction(testing_array):
+        Predicts the target value for a testing sample
+    scoring(testing_array, actual_targets)
+        Scores the linear regression using R2
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> X = np.array([[1], [2], [3], [4]])
+    >>> y = np.array([2, 4, 6, 8])
+    >>> model = linear_regression(method='normal')
+    >>> _ = model.fit(X, y)
+    >>> preds = model.prediction(np.array([[5], [6]]))
+    >>> preds
+    array([10., 12.])
+    >>> model.scoring(X, y)
+    1.0
+    """
 
     def __init__(self,
                  method: Literal['normal', 'gradient_descent'],
@@ -139,7 +270,21 @@ class linear_regression:
                  learning_rate: Optional[float] = None,
                  epochs: Optional[int] = None) -> None:
         
-        # TODO: docstrings
+        """
+        Creates associated attributes for a linear regression with
+        validated parameters
+
+        Parameters
+        ----------
+        method: {'normal, 'gradient_descent'}
+            Method for performing linear regression
+        fit_intercept: bool
+            Whether the model fits an intercept
+        learning_rate: float
+            Learning rate for the model
+        epochs: int
+            Maximum number of epochs
+        """
 
         _validate_parameters(method, learning_rate, epochs, fit_intercept)
 
@@ -154,9 +299,41 @@ class linear_regression:
         self._training_targets: Optional[np.ndarray] = None
 
     
-    def fit(self, training_array: np.ndarray, training_targets: np.ndarray, random_state: Optional[int] = None, shuffle: bool = True) -> 'linear_regression':
+    def fit(self, 
+            training_array: np.ndarray, 
+            training_targets: np.ndarray, 
+            random_state: Optional[int] = None, 
+            shuffle: bool = True) -> 'linear_regression':
         
-        # TODO: docstrings/comments 
+        """
+        Fits the linear regression on given input data using either the
+        normal equation or stochastic gradient descent
+
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_targets: ArrayLike
+            1D array-like object containing target values
+        random_state: int, optional
+            Random state for shuffling data using a random generator; if
+            None, a randomized seed is used (gradient descent)
+        shuffle: boolean, default = 'True'
+            Whether to shuffle the data on each iteration (gradient descent)
+
+        Returns
+        -------
+        linear_regression
+            Fitted linear regression model
+
+        Raises
+        ------
+        TypeError
+            If `shuffle` is not a boolean
+        ValueError
+            If the input data does not match in size, or contains NaN or non-numeric values
+            (for features); for normal equation, if the matrix is singular
+        """
 
         if not isinstance(shuffle, bool):
             raise TypeError('Shuffle must be a boolean')
@@ -208,6 +385,11 @@ class linear_regression:
         return self
 
     def _verify_fit(self) -> Tuple[np.ndarray, np.ndarray]:
+
+        """
+        Verifies that the model is fitted
+        """
+
         if self.coef_ is None:
             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
         
@@ -215,7 +397,19 @@ class linear_regression:
     
     def prediction(self, testing_array: np.ndarray) -> np.ndarray:
         
-        # TODO: doctrings/comments
+        """
+        Predicts the target value for given input samples
+
+        Parameters
+        ----------
+        testing_array: np.ndarray
+            2D array of size (n_samples, n_features)
+
+        Returns
+        -------
+        prediction: np.ndarray
+            Array of predicted target values for each sample
+        """
 
         self._verify_fit()
 
@@ -237,7 +431,21 @@ class linear_regression:
     
     def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike) -> float:
 
-        # TODO: docstrings
+        """
+        Calculates R2 score for regression on input data
+
+        Parameters
+        ----------
+        testing_array: ArrayLike
+            2D array-like object of size (n_samples, n_features)
+        actual_targets: ArrayLike
+            1D array-like object of true target values with size (n_sample,)
+
+        Returns
+        -------
+        r2_score: float
+            R2 score for the predictions compared to true values
+        """
 
         predicted_target_array = self.prediction(testing_array)
         actual_target_array = _ensure_numeric(actual_targets)
@@ -264,10 +472,70 @@ class linear_regression:
     
 class logistic_regression():
     
+    """
+    Implements logistic regression using stochastic gradient descent
+    with sigmoid activation
+
+    Attributes
+    ----------
+    epochs: int
+        Maximum number of epochs
+    learning_rate: float
+        Learning rate for the model
+    coef_: np.ndarray, optional
+        Weight matrix corresponding to each feature
+    bias_: np.ndarray
+        Bias term for the model
+    class_mapping_: dict
+        Dictionary mapping classes to discrete numeric values
+    loss_: list
+        Stores the loss for the model over time
+    _training_array: np.ndarray
+        Stores the training data array
+    _training_targets: np.ndarray
+        Stores the training target values
+    
+    Methods
+    -------
+    fit(training_array, training_targets, random_state, shuffle):
+        Fits the logistic regression based on training targets and class labels
+    prediction(testing_array, threshold):
+        Predicts the class for a testing sample
+    predict_proba(testing_array):
+        Predicts the probability that a sample is in the positive class
+    scoring(testing_array, actual_targets, threshold)
+        Scores the logistic regression using accuracy
+    
+    Examples
+    --------
+    >>> X = np.array([[0], [1], [2], [3]])
+    >>> y = np.array([0, 0, 1, 1])
+    >>> model = logistic_regression(epochs = 100, learning_rate = 0.1)
+    >>> _ = model.fit(X, y, random_state=42)
+    >>> model.prediction(np.array([[1.5], [2.5]]))
+    array([1, 1])
+    >>> model.predict_proba(np.array([[1.5], [2.5]]))
+    array([0.59869776, 0.9333179 ])
+    >>> model.scoring(X, y)
+    1.0
+    """
+
     def __init__(self,
                  epochs: int = 1000,
                  learning_rate: float = 0.01
                  ) -> None:
+        
+        """
+        Creates associated attributes for a logistic regression with
+        validated parameters
+
+        Parameters
+        ----------
+        epochs: int, default = 1000
+            Maximum number of epochs
+        learning_rate: float = 0.01
+            Learning rate for the model
+        """
 
         _validate_parameters(learning_rate = learning_rate, epochs = epochs)
         
@@ -276,11 +544,39 @@ class logistic_regression():
         self.coef_: Optional[np.ndarray] = None
         self.bias_: Optional[float] = None
         self.class_mapping_: Optional[dict] = None
-        self.loss_: Optional[list] = None # TODO - unit tests?
+        self.loss_: Optional[list] = None
     
-    def fit(self, training_array: np.ndarray, training_targets: np.ndarray, random_state: Optional[int] = None, shuffle: bool = True) -> 'logistic_regression':
+    def fit(self, 
+            training_array: np.ndarray, 
+            training_targets: np.ndarray, 
+            random_state: Optional[int] = None, shuffle: bool = True) -> 'logistic_regression':
         
-        # TODO: docstrings/comments 
+        """
+        Fits the logistic regression on given input data using stochastic
+        gradient descent with encoded vectors for class
+
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_targets: ArrayLike
+            2D array-like object containing training labels
+        random_state: int, optional
+            Random state for shuffling data using a random generator; if
+            None, a randomized seed is used
+
+        Returns
+        -------
+        logistic_regression
+            Fitted logistic regression model
+
+        Raises
+        ------
+        TypeError
+            If `shuffle` is not a boolean
+        ValueError
+            If the input data does not match in size, or contains missing values
+        """
 
         if not isinstance(shuffle, bool):
             raise TypeError('Shuffle must be a boolean')
@@ -321,6 +617,10 @@ class logistic_regression():
         return self
     
     def _verify_fit(self) -> Tuple[np.ndarray, np.ndarray]:
+
+        """
+        Verifies that the model has been fitted
+        """
         if self.coef_ is None:
             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
 
@@ -328,7 +628,26 @@ class logistic_regression():
     
     def prediction(self, testing_array: np.ndarray, threshold: float = 0.5) -> np.ndarray:
         
-        # TODO: doctrings/comments
+        """
+        Predicts the target class for given input samples
+
+        Parameters
+        ----------
+        testing_array: np.ndarray
+            2D array of size (n_samples, n_features)
+        threshold: float, default = 0.5
+            Threshold value for assigning a sample to the positive class
+
+        Returns
+        -------
+        classification: np.ndarray
+            Array containing the predicted class for each sample
+        
+        Raises
+        ------
+        TypeError
+            If `threshold` is not a float
+        """
 
         if not isinstance(threshold, float):
             raise TypeError('Threshold value must be a float')
@@ -337,7 +656,7 @@ class logistic_regression():
 
         test_array = _validate_arrays_logistic(testing_array)
         
-        coef_array = _1D_vectorized(self.coef_) # TODO: fix this!
+        coef_array = _1D_vectorized(self.coef_)
 
         if test_array.shape[1] != len(coef_array):
             raise ValueError('Test array must have the same number of input features as coefficients')
@@ -353,13 +672,32 @@ class logistic_regression():
     
     def predict_proba(self, testing_array: np.ndarray) -> np.ndarray:
         
-        # TODO: doctrings/comments
+        """
+        Predicts the target class for given input samples
+
+        Parameters
+        ----------
+        testing_array: np.ndarray
+            2D array of size (n_samples, n_features)
+
+        Returns
+        -------
+        prediction_value: np.ndarray
+            Array containing the probability that each sample belongs
+            to the positive class
+        
+        Raises
+        ------
+        ValueError
+            If the input array does not have the same number of input
+            features as coefficients
+        """
 
         self._verify_fit()
 
         test_array = _validate_arrays_logistic(testing_array)
         
-        coef_array = _1D_vectorized(self.coef_) # TODO: fix this!
+        coef_array = _1D_vectorized(self.coef_)
 
         if test_array.shape[1] != len(coef_array):
             raise ValueError('Test array must have the same number of input features as coefficients')
@@ -372,7 +710,21 @@ class logistic_regression():
     
     def scoring(self, testing_array: ArrayLike, actual_targets: ArrayLike, threshold: float = 0.5) -> np.ndarray:
 
-        # TODO: be consistent w/ arraylike vs np.ndarray
+        """
+        Calculates accuracy score for logistic regression on input data
+
+        Parameters
+        ----------
+        testing_array: ArrayLike
+            2D array-like object of size (n_samples, n_features)
+        actual_targets: ArrayLike
+            1D array-like object of true classes with size (n_sample,)
+
+        Returns
+        -------
+        accuracy: float
+            Accuracy score for the predicted classes
+        """
 
         predicted_target_array = self.prediction(testing_array, threshold)
         actual_target_array = _1D_vectorized(actual_targets)
@@ -383,5 +735,3 @@ class logistic_regression():
         accuracy = np.mean(predicted_target_array == actual_target_array)
 
         return accuracy
-    
-# TODO: potentially add more unit tests for thresholds and validate_arrays_logistic
