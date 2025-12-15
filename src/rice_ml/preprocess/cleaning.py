@@ -31,11 +31,36 @@ __all__ = [
 
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
-# TODO: fix the general formatting to make it consistent across functions (newlines, etc.), account for all nan columns (in unit tests as well)
-
 def missing_data(data_array: ArrayLike, strategy: Literal['drop', 'mean', 'median', 'mode']) -> np.array:
 
-    # TODO: type hints, docstring, explanation of strategies, add workaround for all unique values in mode (and add to unit tests)
+    """
+    Identifies and handles missing data in a 2D array
+
+    Accounts for missing values (NaN) in the array using the specified strategies,
+    which can be one of:
+    - 'drop': Removes rows containing NaN
+    - 'mean' Replaces missing values with the mean of the column
+    - 'median': Replaces missing values with the median of the column
+    - 'mode': Replaces missing values with the mode of the column
+
+    Parameters
+    ----------
+    data_array : ArrayLike
+        Array-like object with shape (n_samples, n_features)
+    strategy : {'drop', 'mean', 'median', 'mode'}
+        Strategy to handle missing data
+
+    Returns
+    -------
+    cleaned_array: np.ndarray
+        2D array with missing values accounted for using the given strategy
+
+    Raises
+    ------
+    ValueError
+        If `strategy` is not one of {'drop', 'mean', 'median', 'mode'}, or
+        if the data array is not 2D or numeric
+    """
 
     array = _2D_numeric(data_array)
     possible_strategies = {'drop', 'mean', 'median', 'mode'}
@@ -67,8 +92,40 @@ def missing_data(data_array: ArrayLike, strategy: Literal['drop', 'mean', 'media
 
 def outlier_identify(data_array: ArrayLike, method: Literal['IQR', 'zscore'], *, drop: bool = False, threshold: float = 3) -> np.array:
 
-    # TODO: type hints, docstring, explanation of strategies, option to print outliers/indicate (?)
+    """
+    Identifies and handles outliers in a 2D array
 
+    Finds outliers in each column from an array using a given strategy, 
+    which can be one of
+    - 'IQR': outliers identified using interquartile range
+    - 'zscore': outliers identified through z-scoring thresholds
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        Array-like object with shape (n_samples, n_features)
+    method: {'IQR', 'zscore'}
+        Strategy to calculate outliers
+    drop: bool, default = False
+        Whether rows with outliers should be removed
+    threshold: float, default = 3
+        Z-score threshold value to be considered an outlier
+
+    Returns
+    -------
+    cleaned_array: np.ndarray
+        2D array with outliers either removed or calculated
+
+    Raises
+    ------
+    TypeError
+        If `drop` is not a boolean or `threshold` is not a float or 
+        integer value
+    ValueError
+        if `threshold` is less than zero or `method` is not one of
+        {'IQR', 'zscore}, or if the data array is not 2D or numeric
+    """
+    
     array = _2D_numeric(data_array)
 
     if not isinstance(drop, bool):
@@ -105,7 +162,31 @@ def outlier_identify(data_array: ArrayLike, method: Literal['IQR', 'zscore'], *,
 
 def duplicate_identify(data_array: ArrayLike, drop: bool = False) -> np.array:
 
-    # TODO: type hints, docstring, explanation of strategies, option to print duplicate rows/indicate (?)
+    """
+    Identifies and handles duplicate rows in a 2D array
+
+    Finds rows that are duplicates of at least one other row
+    in the array, and optionally drops them
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        Array-like object with shape (n_samples, n_features)
+    drop: bool, default = False
+        Whether duplicate rows should be removed
+
+    Returns
+    -------
+    cleaned_array: np.ndarray
+        2D array with duplicate rows either removed or calculated
+
+    Raises
+    ------
+    TypeError
+        If `drop` is not a boolean
+    ValueError
+        If the data array is not 2D or numeric
+    """
 
     array = _2D_numeric(data_array)
     if not isinstance(drop, bool):

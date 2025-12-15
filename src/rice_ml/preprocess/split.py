@@ -29,6 +29,32 @@ __all__ = [
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
 def _bounded_count(length: int, proportion: float) -> int:
+    
+    """
+    Calculates a bounded count for a length using a 
+    specified proportion
+
+    Ensures that the count is within appropriate bounds to prevent
+    empty splits
+
+    Parameters
+    ----------
+    length: int
+        Number of elements
+    proportion: float
+        Proportion to be selected
+
+    Returns
+    -------
+    bound_count: int
+        A bounded integer count based on the given proportion
+
+    Raises
+    ------
+    TypeError
+        If `length` is not an integer or `proportion` is not a
+        float or integer
+    """
 
     if not isinstance(length, int):
         raise TypeError(f"First value must be an integer, got {type(length).__name__}")
@@ -36,17 +62,39 @@ def _bounded_count(length: int, proportion: float) -> int:
         raise TypeError(f"Second number must be a float, got {type(proportion).__name__}")
 
     count = int(round(proportion * length))
+
     if length <= 1:
         if count < length:
             return 0
         else:
             return 1
-        
-    return min(max(1, count), length - 1)
+    
+    bound_count = min(max(1, count), length - 1)
+
+    return bound_count
 
 def _random_number(random_state: Optional[int]) -> np.random.Generator:
     
-    # TODO: type hints/docstrings
+    """
+    Creates a random number generator using NumPy
+
+    Parameters
+    ----------
+    random_state: int, optional
+        Random state for reproducibility; if none specified,
+        a random seed will be used
+
+    Returns
+    -------
+    np.random.Generator
+        NumPy random number generator instance using the specified
+        random state
+
+    Raises
+    ------
+    TypeError
+        If `random_state` is not an integer or None
+    """
 
     if random_state is not None and not isinstance(random_state, int):
             raise TypeError(f"Random state must be an integer")
@@ -62,7 +110,45 @@ def _stratified_indices(data: np.ndarray,
                         validation: bool = False,
                         val_size: Optional[float] = None) -> Union[Tuple[np.array, np.array], Tuple[np.array, np.array, np.array]]:
 
-    # TODO: docstrings/type hints, examples
+    """
+    Generates stratified indices for data given a specified test size
+
+    Splits indices to maintaing proportions across the results, which
+    can then be used for train/test data splits that require the preservation
+    of relative proportions for each class
+
+    Parameters
+    ----------
+    data: np.ndarray
+        1D array of class labels
+    test_size: float
+        Proportion of data that should be placed in the test set
+    rng: np.random.Generator
+        Random number generator used for shuffling indices
+    validation: bool, default = False
+        Whether a validation split should be generated
+    val_size: float, optional
+        Proportion of the remaining data assigned to validation, required
+        when `validation` is True
+
+    Returns
+    -------
+    testing_indices: np.ndarray
+        1D array containing indices of test data
+    training_indices: np.ndarray
+        1D array containing indices of training data
+    val_indices: np.ndarray (if `validation` is True)
+        1D array containing indices of validation data
+
+    Raises
+    ------
+    TypeError
+        If `test_size` is not a float, `validation` is not a boolean, 
+        or `rng` is not a random generator instance
+    ValueError
+        If proportions are not in the range 0 to 1, or are not compatible
+        with one another
+    """
 
     if not isinstance(test_size, float):
         raise TypeError(f"Test proportion must be a float, got {type(test_size).__name__}")
@@ -174,7 +260,55 @@ def train_test(data_array: ArrayLike,
                             Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray],
                         ]]:
     
-    # TODO: type hints/docstrings/examples
+    """
+    Splits data into training, testing, and validation (optional) sets
+
+    Divides data and label vectors based on the given proportion sizes, with 
+    support for shuffling and stratification based on separate labels
+
+    Parameters
+    ----------
+    data_array: np.ndarray
+        2D array of size (n_samples, n_features)
+    data_vector: ArrayLike, optional
+        Optional target or label vector of size (n_samples,)
+    test_size: float, default = 0.3
+        Proportion of data assigned to the test set
+    validation: boolean, default = False
+        Whether data is split into a validation set
+    val_size : float, default = 0.1
+        Proportion of data assigned to the validation set
+    shuffle: boolean, default = True
+        Whether data should be shuffled before splitting
+    stratify: ArrayLike, optional
+        Labels used for stratified splitting, if applicable
+    random_state: int, optional
+        Random state used in shuffling
+
+    Returns
+    -------
+    training_array: np.ndarray
+        2D array containing training data
+    testing_array: np.ndarray
+        2D array containing testing data
+    val_array: np.ndarray (if `validation` is True)
+        2D array containing validation data
+    training_data_vector: np.ndarray
+        1D array containing training labels
+    testing_data_vector: np.ndarray
+        1D array containing testing labels
+    val_data_vector: np.ndarray (if `validation` is True)
+        1D array containing testing labels
+
+    Raises
+    ------
+    TypeError
+        If `test_size` is not a float, or `validation` or `shuffle` is not 
+        a boolean
+    ValueError
+        If proportions are not in the range 0 to 1 or are incompatible, or
+        if shapes of arrays do not match
+    """
 
     array = _2D_numeric(data_array,'data array')
 
@@ -187,7 +321,6 @@ def train_test(data_array: ArrayLike,
     
     if not (0.0 < test_size < 1.0):
         raise ValueError(f"Test proportion must be between 0 and 1, got {test_size}")
-
 
     rng = _random_number(random_state)
 

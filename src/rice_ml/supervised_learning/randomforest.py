@@ -1,32 +1,27 @@
+
 """
     Random forest algorithms (NumPy)
 
-    # TODO: update this!
-
-    Functions
-    ---------
-    
+    This module contains the classes implementing random forest algorithms for
+    classification and regression tasks. It uses combinations of decision or
+    regression trees, and supports numeric input features for categorical (classification)
+    or numeric (regression) targets
 
     Classes
     ---------
-   
+    random_forest
+        Implements the random forest algorithm for either classification or regression
 """
-
-# TODO: finish above!
 
 __all__ = [
     'random_forest',
 ]
 
-# TODO: arraylike?
-
 import numpy as np
 import pandas as pd
 from typing import *
-import warnings
 from rice_ml.preprocess.datatype import *
 from rice_ml.preprocess.split import _random_number
-from rice_ml.supervised_learning.distances import _ensure_numeric
 from rice_ml.supervised_learning.decisiontrees import *
 
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
@@ -38,7 +33,31 @@ def _validate_parameters_rf(n_trees: int,
                          max_features: Optional[Union[int, float, Literal["sqrt", "log2"]]],
                          random_state: Optional[int]) -> None:
     
-    # TODO: type hints, docstrings
+    """
+    Validates hyperparameters for a random forest model
+
+    Parameters
+    ----------
+    task: {'classification', 'regression'}
+        Specifies whether the task is classification (decision trees) or
+        regression (regression trees)
+    max_depth: int, optional
+        Maximum depth of the tree
+    min_samples_split: int, optional
+        Minimum number of samples required to split a node
+    max_features: {int, float, 'sqrt', 'log2'}, optional
+        Specifies how to calculate the maximum number of features considered
+        in each tree
+    random_state: int, optional
+        The random state for the random generator
+
+    Raises
+    ------
+    TypeError
+        If parameters are not of valid types
+    ValueError
+        If parameters do not have appropriate values
+    """
 
     if not isinstance(n_trees, int):
         raise TypeError('Number of trees must be an integer')
@@ -64,6 +83,43 @@ def _validate_parameters_rf(n_trees: int,
     
 class random_forest():
 
+    """
+    Random forest classifier, with component trees using entropy and 
+    information gain for classification, and variance reduction for regression
+
+    Attributes
+    ----------
+    n_trees: int
+        Number of trees in the random forest
+    task: {'classification', 'regression'}
+        Type of task performed
+    max_depth: int
+        Maximum depth of each tree
+    min_samples_split: int, default = 2
+        Minimum number of samples required to split a node
+    max_features: {int, float, 'sqrt', 'log2'}
+        Specifies how to calculate the maximum number of features considered
+        in each tree
+        - int: a defined number of features
+        - float: a proportion of total features
+        - 'sqrt': the integer value of the square root of total number of features
+        - 'log2': the integer value of the log2 of total number of features
+    random_state: int
+        Random state for bootstrapping and feature selection; if None,
+        a randomized seed is used
+    trees: list
+        List of trees in the random forest
+    n_features_: int
+        Number of features in the data
+
+    Methods
+    -------
+    fit(training_array, training_targets):
+        Fits the random forest based on training labels and numeric data
+    prediction(testing_array):
+        Predicts the labels for a set of testing data
+    """
+
     def __init__(self,
                  n_trees: int,
                  task: Literal['classification', 'regression'],
@@ -73,6 +129,32 @@ class random_forest():
                  random_state: Optional[int] = None
                  ) -> None:
         
+        """
+        Creates associated attributes for a random forest tree with
+        validated parameters
+
+        Parameters
+        ----------
+        n_trees: int
+            Number of trees in the random forest
+        task: {'classification', 'regression'}
+            Type of task performed
+        max_depth: int
+            Maximum depth of each tree
+        min_samples_split: int, default = 2
+            Minimum number of samples required to split a node
+        max_features: {int, float, 'sqrt', 'log2'}
+            Specifies how to calculate the maximum number of features considered
+            in each tree
+            - int: a defined number of features
+            - float: a proportion of total features
+            - 'sqrt': the integer value of the square root of total number of features
+            - 'log2': the integer value of the log2 of total number of features
+        random_state: int
+            Random state for bootstrapping and feature selection; if None,
+            a randomized seed is used
+        """
+         
         _validate_parameters_rf(n_trees, task, max_depth, min_samples_split, max_features, random_state)
 
         self.n_trees = n_trees
@@ -86,6 +168,11 @@ class random_forest():
 
     def _bootstrap_data(self, training_array: np.ndarray, training_targets: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
+        """
+        Generates samples of bootstrapped data using random selection with
+        replacement from a data array
+        """
+
         n_samples = training_array.shape[0]
         rng = _random_number(self.random_state)
         index_choices = rng.choice(n_samples, size = n_samples, replace = True)
@@ -96,6 +183,11 @@ class random_forest():
     
     def _feature_selection(self, total_features: int) -> np.ndarray:
         
+        """
+        Selects the features to be used in each component tree
+        based on the given method
+        """
+
         selection_type = self.max_features
 
         if not isinstance(total_features, int):
@@ -124,7 +216,30 @@ class random_forest():
 
     def fit(self, training_array: ArrayLike, training_targets: ArrayLike) -> 'random_forest':
         
-        # TODO: type hints/docstrings
+        """
+        Fits the random forest on given input data
+
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_targets: ArrayLike
+            1D array-like object containing training values
+
+        Returns
+        -------
+        random_forest
+            Fitted random forest model
+            - For classification, each component tree is a decision tree with
+            majority voting
+            - For regression, each component tree is a regression tree with
+            averaging
+
+        Raises
+        ------
+        ValueError
+            If targets have missing data, or data is not numeric
+        """
 
         train_array = _2D_numeric(training_array)
         train_targets = _1D_vectorized(training_targets)
@@ -150,6 +265,11 @@ class random_forest():
         return self
 
     def _verify_fit(self) -> "random_forest":
+
+        """
+        Verifies that the model has been fitted
+        """    
+
         if len(self.trees) == 0:
             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
 
@@ -157,7 +277,28 @@ class random_forest():
     
     def prediction(self, testing_array: ArrayLike) -> np.ndarray:
 
-        # TODO: type hints, docstrings
+        """
+        Predicts the target values for given input samples
+
+        Parameters
+        ----------
+        testing_array: ArrayLike
+            2D array-like object of size (n_samples, n_features)
+
+        Returns
+        -------
+        final_prediction_array: np.ndarray
+            Array of predicted target values for each sample
+            - For classification, this corresponds to the class label
+            - For regression, this corresponds to the target feature
+        
+        Raises
+        ------
+        ValueError
+            If the number of features in the input data does not
+            match the number of features in training data, or if some
+            values are not numeric
+        """
 
         self._verify_fit()
 

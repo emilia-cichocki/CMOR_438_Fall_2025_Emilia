@@ -1,41 +1,57 @@
+
 """
     Decision and regression tree algorithms (NumPy)
 
+    This module contains the classes implementing a decision tree and regression
+    tree algorithm. It supports numeric input features for data, with either 
+    categorical (decision trees) or numeric (decision trees, regression trees) target
+    values. 
 
-    # TODO: update this here, calculated using entropy - clarify that it only allows for numeric inputs
-
-    Functions
-    ---------
-    
+    It utilizes information gain and entropy for decision trees, as well
+    as variance reduction for regression trees
 
     Classes
     ---------
-   
+    Node
+        Class for a node in a tree
+    decision_tree
+        Decision tree classifier, based on entropy
+    regression_tree
+        Regression tree, based on variance reduction
 """
-
-# TODO: finish above!
 
 __all__ = [
     'decision_tree',
     'regression_tree'
 ]
 
-# TODO: arraylike?
-
 import numpy as np
 import pandas as pd
 from typing import *
-import warnings
 from rice_ml.preprocess.datatype import *
-from rice_ml.preprocess.split import _random_number
 from rice_ml.supervised_learning.distances import _ensure_numeric
 
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
-
 def _validate_parameters(max_depth: Optional[int], min_samples_split: Optional[int]) -> None:
 
-    # TODO: type hints, docstrings
+    """
+    Validates hyperparameters for a tree
+
+    Parameters
+    ----------
+    max_depth: int, optional
+        Maximum depth of the tree
+    min_samples_split: int, optional
+        Minimum number of samples required to split a node
+
+    Raises
+    ------
+    TypeError
+        If parameters are not of valid types
+    ValueError
+        If parameters do not have appropriate values
+    """
 
     if max_depth is not None and not isinstance(max_depth, int):
         raise TypeError('Maximum depth must be an integer')
@@ -51,7 +67,27 @@ def _validate_parameters_node(feature_index: Optional[int],
                               left: Optional["Node"] = None, 
                               right: Optional["Node"] = None) -> None:
 
-    # TODO: type hints, docstrings
+    """
+    Validates hyperparameters for a node
+
+    Parameters
+    ----------
+    feature_index: int, optional
+        Index of feature used to split the node
+    threshold_value: float, optional
+        Value of feature threshold used for splits
+    left: Node, optional
+        Left child node
+    right: Node, optional
+        Right child node
+
+    Raises
+    ------
+    TypeError
+        If parameters are not of valid types
+    ValueError
+        If parameters do not have appropriate values
+    """
 
     if feature_index is not None and not isinstance(feature_index, int):
         raise TypeError('Feature index must be an integer')
@@ -64,7 +100,21 @@ def _validate_parameters_node(feature_index: Optional[int],
     if right is not None and not isinstance(right, Node):
         raise TypeError('Right node must be an instance of the Node class')
 
-def _entropy(train_targets: np.ndarray):
+def _entropy(train_targets: np.ndarray) -> float:
+
+    """
+    Calculates entropy for a target vector
+
+    Parameters
+    ----------
+    train_targets: np.ndarray
+        1D vector of targets
+
+    Returns
+    -------
+    entropy: float
+        Calculated entropy value
+    """
 
     train_targets = _1D_vectorized(train_targets)
     _, counts = np.unique(train_targets, return_counts = True)
@@ -77,6 +127,31 @@ def _entropy(train_targets: np.ndarray):
 
 class Node():
 
+    """
+    Representation of a decision or regression tree node
+
+    Nodes are either decision nodes used to create further splits in the data,
+    or leaf nodes that have an associated prediction
+
+    Attributes
+    ----------
+    feature_index: int, optional
+        Index of feature used to split the node
+    threshold_value: float, optional
+        Value of feature threshold used for splits
+    left: Node, optional
+        Left child node
+    right: Node, optional
+        Right child node
+    value: Any, optional
+        Value of a leaf node
+
+    Methods
+    -------
+    is_leaf():
+        Returns the boolean for a node value
+    """
+
     def __init__(self,
                  feature_index: Optional[int] = None,
                  threshold_value: Optional[float] = None,
@@ -84,6 +159,24 @@ class Node():
                  right: "Node" = None,
                  value: Optional[Any] = None) -> None:
         
+        """
+        Creates associated attributes for a node with
+        validated parameters
+
+        Parameters
+        ----------
+        feature_index: int, optional
+            Index of feature used to split the node
+        threshold_value: float, optional
+            Value of feature threshold used for splits
+        left: Node, optional
+            Left child node
+        right: Node, optional
+            Right child node
+        value: Any, optional
+            Value of a leaf node
+        """
+
         _validate_parameters_node(feature_index, threshold_value, left, right)
 
         self.feature_index = feature_index
@@ -93,20 +186,70 @@ class Node():
         self.value: Optional[Any] = value
 
     def is_leaf(self) -> bool:
+        
+        """
+        Returns the boolean of a node value
+
+        Returns
+        -------
+        bool
+            Whether a value is associated with the node
+        """
+        
         return self.value is not None
 
 class decision_tree():
+    
+    """
+    Decision tree classifier using entropy and information gain
+
+    Attributes
+    ----------
+    max_depth: int, optional
+        Maximum depth of the tree
+    min_samples_split: int, optional, default = 2
+        Minimum number of samples required to split a node
+    tree: Node
+        Created decision tree
+    _class_mappings: dict, optional
+        Dictionary containing class mappings to numeric values
+    _reverse_class_mapping: dict, optional
+        Dictionary containing numeric values to class mappings
+    _n_features: int, optional
+        Number of features
+
+    Methods
+    -------
+    fit(training_array, training_targets):
+        Fits the decision tree based on training labels and numeric data
+    predict(testing_array):
+        Predicts the labels for a set of testing data
+    print_tree(node, depth):
+        Prints a visual representation of the tree
+    """
 
     def __init__(self,
                  max_depth: Optional[int] = None,
                  min_samples_split: Optional[int] = 2) -> None:
-        
+
+        """
+        Creates associated attributes for a decision tree with
+        validated parameters
+
+        Parameters
+        ----------
+        max_depth: int, optional
+            Maximum depth of the tree
+        min_samples_split: int, optional, default = 2
+            Minimum number of samples required to split a node
+        """
+
         _validate_parameters(max_depth, min_samples_split)
 
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.tree: Optional[Node] = None
-        self._class_mappings: Optional[dict] = None # TODO: flip the _ so it's class_mappings_
+        self._class_mappings: Optional[dict] = None
         self._reverse_class_mappings: Optional[dict] = None
         self._n_features: Optional[int] = None
 
@@ -115,6 +258,10 @@ class decision_tree():
                           left_class: np.ndarray,
                           right_class: np.ndarray) -> float:
         
+        """
+        Calculates information gain for a given split using entropy
+        """
+
         parent_entropy = _entropy(parent_class)
         left_entropy = _entropy(left_class)
         right_entropy = _entropy(right_class)
@@ -133,6 +280,12 @@ class decision_tree():
                     training_array: ArrayLike,
                     training_targets: ArrayLike) -> Tuple[int, float]:
         
+        """
+        Finds the optimal split for a set of training data
+        and targets, returning the associated feature and threshold
+        values
+        """
+
         train_array = _2D_numeric(training_array)
         train_targets = _1D_vectorized(training_targets)
 
@@ -166,6 +319,10 @@ class decision_tree():
                 
     def _leaf_value(self, training_targets: np.ndarray) -> Union[int, float, str]:
 
+        """
+        Determines the leaf value for a node based on class counts
+        """
+
         train_targets = _1D_vectorized(training_targets)
         classes, counts = np.unique(train_targets, return_counts = True)
         classification = classes[np.argmax(counts)]
@@ -173,6 +330,11 @@ class decision_tree():
         return classification
     
     def _build_tree(self, training_array: ArrayLike, training_targets: ArrayLike, depth: int) -> Node:
+
+        """
+        Recursively builds the decision tree from a set of training
+        data and targets
+        """
 
         train_array = _2D_numeric(training_array)
         train_targets = _1D_vectorized(training_targets)
@@ -206,6 +368,28 @@ class decision_tree():
     
     def fit(self, training_array: ArrayLike, training_targets: ArrayLike) -> "decision_tree":
 
+        """
+        Fits the decision tree on given input data
+
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_targets: ArrayLike
+            1D array-like object containing training labels
+
+        Returns
+        -------
+        decision_tree
+            Fitted model
+
+        Raises
+        ------
+        ValueError
+            If targets have missing data, or input data
+            is not numeric
+        """
+
         training_targets = _1D_vectorized(training_targets)
         if pd.isna(training_targets).any():
             raise ValueError('Target array contains NaN values')
@@ -230,6 +414,11 @@ class decision_tree():
         return self
     
     def _verify_fit(self) -> "decision_tree":
+
+        """
+        Verifies that the decision tree has been created
+        """
+
         if self.tree is None:
             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
 
@@ -237,6 +426,10 @@ class decision_tree():
     
     def _predict_recursive(self, testing_row: np.ndarray, node: Node) -> Union[int, float, str]:
         
+        """
+        Recursively predicts the target label for an input sample
+        """
+
         if node.value is not None:
             return node.value
         
@@ -246,6 +439,27 @@ class decision_tree():
             return self._predict_recursive(testing_row, node.right)
         
     def predict(self, testing_array: ArrayLike) -> np.ndarray:
+        
+        """
+        Predicts the class labels for given test samples
+
+        Parameters
+        ----------
+        testing_array: ArrayLike
+            2D array-like object of size (n_samples, n_features)
+
+        Returns
+        -------
+        predictions: np.ndarray
+            Array of predicted class labels for each sample
+        
+        Raises
+        ------
+        ValueError
+            If the number of features in the testing data does not
+            match the number of features in training data, or if some
+            values are not numeric
+        """
 
         self._verify_fit()
 
@@ -268,6 +482,27 @@ class decision_tree():
     
     def print_tree(self, node: Optional[Node] = None, depth: int = 0) -> None:
         
+        """
+        Prints a visual representation of the decision tree
+
+        The tree is displayed recursively with indentation indicating depth; each
+        node is given with the feature index and threshold value until a leaf
+        node is reached, at which point the associated label is displayed
+
+        Parameters
+        ----------
+        node: Node, optional
+            The current node to print; begins from the root of the fitted
+            decision tree if None
+        depth: int, default = 0
+            Current depth of the tree
+
+        Raises
+        ------
+        RuntimeError
+            If the model has not been fitted prior to use
+        """
+
         if node is None:
             self._verify_fit()
             node = self.tree
@@ -279,14 +514,48 @@ class decision_tree():
             self.print_tree(node.left, depth + 1)
             self.print_tree(node.right, depth + 1)
 
-# TODO: add a scoring metric
-
 class regression_tree():
+
+    """
+    Regression tree using variance reduction
+
+    Attributes
+    ----------
+    max_depth: int, optional
+        Maximum depth of the tree
+    min_samples_split: int, optional, default = 2
+        Minimum number of samples required to split a node
+    tree: Node
+        Created regression tree
+    _n_features: int, optional
+        Number of features
+
+    Methods
+    -------
+    fit(training_array, training_targets):
+        Fits the regression tree based on training values and numeric data
+    predict(testing_array):
+        Predicts the labels for a set of testing data
+    print_tree(node, depth):
+        Prints a visual representation of the tree
+    """
 
     def __init__(self,
                  max_depth: Optional[int] = None,
                  min_samples_split: Optional[int] = 2) -> None:
         
+        """
+        Creates associated attributes for a regression tree with
+        validated parameters
+
+        Parameters
+        ----------
+        max_depth: int, optional
+            Maximum depth of the tree
+        min_samples_split: int, optional, default = 2
+            Minimum number of samples required to split a node
+        """
+
         _validate_parameters(max_depth, min_samples_split)
 
         self.max_depth = max_depth
@@ -299,6 +568,10 @@ class regression_tree():
                           left_class: np.ndarray,
                           right_class: np.ndarray) -> float:
         
+        """
+        Calculates variance reduction for a given split
+        """
+
         parent_class = _ensure_numeric(parent_class)
         left_class = _ensure_numeric(left_class)
         right_class = _ensure_numeric(right_class)
@@ -324,6 +597,12 @@ class regression_tree():
                     training_array: ArrayLike,
                     training_targets: ArrayLike) -> Tuple[int, float]:
         
+        """
+        Finds the optimal split for a set of training data
+        and targets, returning the associated feature and threshold
+        values
+        """
+
         train_array = _2D_numeric(training_array)
         train_targets = _ensure_numeric(training_targets)
 
@@ -357,6 +636,10 @@ class regression_tree():
                 
     def _leaf_value(self, training_targets: np.ndarray) -> Union[int, float, str]:
 
+        """
+        Calculates the value at a leaf node through averaging
+        """
+
         train_targets = _ensure_numeric(training_targets)
         regression = np.mean(train_targets)
 
@@ -364,6 +647,11 @@ class regression_tree():
     
     def _build_tree(self, training_array: ArrayLike, training_targets: ArrayLike, depth: int) -> Node:
         
+        """
+        Recursively builds the regression tree from a set of training
+        data and target values
+        """
+
         train_array = _2D_numeric(training_array)
         train_targets = _ensure_numeric(training_targets)
 
@@ -396,6 +684,27 @@ class regression_tree():
     
     def fit(self, training_array: ArrayLike, training_targets: ArrayLike) -> "regression_tree":
 
+        """
+        Fits the regression tree on given input data
+
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_targets: ArrayLike
+            1D array-like object containing training values
+
+        Returns
+        -------
+        regression_tree
+            Fitted model
+
+        Raises
+        ------
+        ValueError
+            If targets have missing data, or data is not numeric
+        """
+
         train_targets = _ensure_numeric(training_targets)
         train_array = _2D_numeric(training_array)
         self._n_features = train_array.shape[1]
@@ -406,6 +715,11 @@ class regression_tree():
         return self
     
     def _verify_fit(self) -> "regression_tree":
+
+        """
+        Verifies that the regression tree has been fit
+        """
+
         if self.tree is None:
             raise RuntimeError("Model is not fitted; call fit(training_array, training_targets)")
 
@@ -413,6 +727,10 @@ class regression_tree():
 
     def _predict_recursive(self, testing_row: np.ndarray, node: Node) -> Union[int, float, str]:
         
+        """
+        Recursively predicts the value of a testing sample
+        """
+
         if node.value is not None:
             return node.value
         
@@ -422,6 +740,27 @@ class regression_tree():
             return self._predict_recursive(testing_row, node.right)
         
     def predict(self, testing_array: ArrayLike) -> np.ndarray:
+
+        """
+        Predicts the target values for given test samples
+
+        Parameters
+        ----------
+        testing_array: ArrayLike
+            2D array-like object of size (n_samples, n_features)
+
+        Returns
+        -------
+        prediction_array: np.ndarray
+            Array of predicted target values for each sample
+        
+        Raises
+        ------
+        ValueError
+            If the number of features in the testing data does not
+            match the number of features in training data, or if some
+            values are not numeric
+        """
 
         self._verify_fit()
 
@@ -442,6 +781,27 @@ class regression_tree():
 
     def print_tree(self, node: Optional[Node] = None, depth: int = 0) -> None:
         
+        """
+        Prints a visual representation of the regression tree
+
+        The tree is displayed recursively with indentation indicating depth; each
+        node is given with the feature index and threshold value until a leaf
+        node is reached, at which point the associated value is displayed
+
+        Parameters
+        ----------
+        node: Node, optional
+            The current node to print; begins from the root of the fitted
+            regression tree if None
+        depth: int, default = 0
+            Current depth of the tree
+
+        Raises
+        ------
+        RuntimeError
+            If the model has not been fitted prior to use
+        """
+
         if node is None:
             self._verify_fit()
             node = self.tree

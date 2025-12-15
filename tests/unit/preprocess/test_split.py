@@ -53,11 +53,6 @@ def test_random_number_type_random_state():
     with pytest.raises(TypeError):
         _random_number(random_state)
 
-
-
-
-
-
 def test_stratified_indices_basic_array():
     test_array = np.array([1, 2, 3, 2, 1, 3, 1, 3, 3, 1])
     test_size = 0.25

@@ -28,11 +28,35 @@ __all__ = [
 
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
-# TODO: fix the general formatting to make it consistent across functions (newlines, etc.)
-
 def _2D_numeric(data_array: ArrayLike, name: str = 'Data') -> np.ndarray:
 
-    # TODO: add type hints and docstrings, change the name Data
+    """
+    Converts an input to a 2D numeric array
+
+    Ensures that the data is array-like, 2D, non-empty, and 
+    contains only numeric values or non-numeric values that can
+    be converted to a float
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        Array-like object with shape (n_samples, n_features)
+    name: str, default = 'Data'
+        Name of the input array for use in error messages
+
+    Returns
+    -------
+    array: np.ndarray
+        2D array with float entries
+
+    Raises
+    ------
+    TypeError
+        If `data_array` is not array-like or contains non-numeric values, or
+        if `name` is not a string
+    ValueError
+        If `data_array` is not 2D or is empty
+    """
 
     if not isinstance(data_array, (np.ndarray, tuple, list, pd.DataFrame, pd.Series)):
         raise TypeError(f'Data array must be ArrayLike, got {type(data_array).__name__}')
@@ -59,7 +83,32 @@ def _2D_numeric(data_array: ArrayLike, name: str = 'Data') -> np.ndarray:
 
 def _1D_vectorized(data_vector: Optional[ArrayLike], name: str = 'Data') -> Optional[np.ndarray]:
     
-    # TODO: add type hints and docstrings, rename the function
+    """
+    Converts an input to a 1D array
+
+    Ensures that the data is array-like, 1D, and non-empty, but
+    allows for non-numeric values
+
+    Parameters
+    ----------
+    data_vector: optional, ArrayLike
+        Array-like object with shape (n_samples, n_features)
+    name: str, default = 'Data'
+        Name of the input array for use in error messages
+
+    Returns
+    -------
+    array: np.ndarray
+        1D vector with non-empty entries
+
+    Raises
+    ------
+    TypeError
+        If `data_vector` is not array-like or if `name` is not a 
+        string
+    ValueError
+        If `data_vector` is not 1D or is empty
+    """
 
     if (data_vector is not None) and (not isinstance(data_vector, (np.ndarray, tuple, list, pd.DataFrame, pd.Series))):
         raise TypeError(f'Data vector must be an array, got {type(data_vector).__name__}')
@@ -81,7 +130,27 @@ def _1D_vectorized(data_vector: Optional[ArrayLike], name: str = 'Data') -> Opti
 
 def _shape_match(data_array: np.ndarray, data_vector: Optional[np.ndarray]) -> None:
 
-    # TODO: add type hints and docstrings
+    """
+    Checks the shapes of two input arrays
+
+    Ensures that the input arrays have the same first dimension
+    (typically representing number of samples)
+
+    Parameters
+    ----------
+    data_array: np.ndarray
+        Array with each row representing a sample
+    data_vector: optional, np.ndarray
+        Array with each row representing a sample
+
+    Raises
+    ------
+    TypeError
+        If `data_vector` or `data_array` is not an array
+    ValueError
+        If `data_vector` and `data_array` do not have the same first
+        dimension
+    """
 
     if not isinstance(data_array, np.ndarray):
         raise TypeError(f'Data array must be an array, got {type(data_array).__name__}')

@@ -1,7 +1,29 @@
 
 """
-    Postprocessing utilities for classification (Numpy)
-    # TODO: finish this!!
+    Postprocessing utilities for classification (NumPy)
+    
+    This module calculates and visualizes a comprehensive set of postprocessing 
+    and evaluation metrics for classification algorithms, with support for 
+    NumPy arrays.
+
+    Functions
+    ---------
+    accuracy_score
+        Computes accuracy score using predicted and true classes
+    confusion_matrix
+        Calculates the confusion matrix (optional plotting)
+    precision_score
+        Computes precision score using predicted and true classes
+    recall_score
+        Computes recall score using predicted and true classes
+    f1_score
+        Computes F1 score using predicted and true classes
+    roc_auc
+        Computes the AUC score for binary classification
+    log_loss
+        Computes the log loss for binary or multi-class classification
+    print_model_metrics
+        Prints accuracy and micro/macro precision, recall, and F1
 
 """
 
@@ -26,6 +48,32 @@ __all__ = [
 
 def _validate_vector_match(predicted_classes: np.ndarray, true_classes: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     
+    """
+    Validation of input vectors
+    
+    Converts both inputs to 1D arrays of an arbitrary data type and checks 
+    that they have the same length
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+
+    Returns
+    -------
+    pred_class: np.ndarray
+        1D array of predicted class labels
+    true_class: np.ndarray
+        1D array of true class labels
+
+    Raises
+    ------
+    ValueError
+        If predicted and true class arrays are of different lengths
+    """
+
     pred_class = _1D_vectorized(predicted_classes)
     true_class = _1D_vectorized(true_classes)
     if pred_class.shape[0] != true_class.shape[0]:
@@ -37,6 +85,41 @@ def _class_counts(predicted_classes: np.ndarray,
                   true_classes: np.ndarray, 
                   labels: Optional[Sequence] = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+
+    """
+    Classification metrics by class
+
+    Calculates the true positive, false positive, and false negative scores per class,
+    as well as the confusion matrix and input labels 
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+    labels: sequence, optional
+        Sequence of class labels
+
+    Returns
+    -------
+    true_pos: np.ndarray
+        1D array of true positives by class
+    false_pos: np.ndarray
+        1D array of false positives by class
+    false_neg: np.ndarray
+        1D array of false negatives by class
+    labels: np.ndarray
+        1D array of class labels
+    confusion_matrix
+        2D confusion matrix where rows correspond to true labels and
+        columns correspond to predicted labels
+    
+    Raises
+    ------
+    TypeError
+        If labels are not a sequence
+    """
 
     pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
     
@@ -68,6 +151,29 @@ def _class_counts(predicted_classes: np.ndarray,
     return true_pos, false_pos, false_neg, labels, confusion_matrix
 
 def _plot_confusion(confusion_matrix: np.ndarray, labels: Optional[Sequence] = None, display_value: bool = True) -> None:
+    
+    """
+    Plot a confusion matrix heatmap
+
+    Parameters
+    ----------
+    confusion_matrix: np.ndarray
+        2D numeric array representing the confusion matrix, with rows corresponding
+        to true labels and columns to predicted labels
+    labels: sequence, optional
+        Sequence of labels to display on confusion matrix axes; must match
+        dimensions of the matrix
+    display_value: bool, default = True
+        Determines whether to display the corresponding numbers in each cell
+
+    Raises
+    ------
+    TypeError
+        If `confusion_matrix` is not a NumPy array, input `labels` are not a
+        sequence, or the `display_value` parameter is not a boolean
+    ValueError
+        If `confusion_matrix` cannot be converted to a 2D numeric array
+    """
     
     if not isinstance(confusion_matrix, np.ndarray):
         raise TypeError("Confusion matrix must be an array")
@@ -101,6 +207,42 @@ def _plot_confusion(confusion_matrix: np.ndarray, labels: Optional[Sequence] = N
 
 def _validate_probability(probabilities: np.ndarray, true_classes: np.ndarray) -> Tuple[np.ndarray, np.ndarray, int]:
     
+    """
+    Validation of the class probability predictions
+
+    Ensures that the probability array is a numeric array matching the
+    number of samples, and only contains values ranging from 0 to 1
+
+    Parameters
+    ----------
+    probabilities: np.ndarray
+        Array of predicted class probabilities
+        May be either:
+        - 1D array of shape (n_samples,) for binary classification
+          with probabilities for the positive class
+        - 2D array of shape (n_samples, n_classes) for multi-class
+          classification with probabilities for each class
+    true_classes: np.ndarray
+        Array of true class labels
+
+    Returns
+    -------
+    true_class: np.ndarray
+        1D array of class labels
+    prob_overall: np.ndarray
+        2D array of validated probabilities of shape (n_samples, n_classes)
+    n_classes: int
+        Total number of classes
+
+    Raises
+    ------
+    TypeError
+        If `probabilities` is not a NumPy array.
+    ValueError
+        If the dimensions of the probability array are incorrect, do not match
+        the number of samples in `true_classes`, or have values beyond 0 to 1
+    """
+
     true_class = _ensure_numeric(true_classes)
 
     if not isinstance(probabilities, np.ndarray):
@@ -131,7 +273,36 @@ def _validate_probability(probabilities: np.ndarray, true_classes: np.ndarray) -
 
 def accuracy_score(predicted_classes: np.ndarray, true_classes: np.ndarray) -> float:
 
-    # TODO: type hints/docsrings
+    """
+    Calculates accuracy score
+
+    Calculates accuracy as the number of correctly predicted labels divided
+    by the total number of samples
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+
+    Returns
+    -------
+    accuracy: float
+        Accuracy score between 0 and 1
+
+    Raises
+    ------
+    ValueError
+        If predicted and true class arrays have different lengths
+
+    Examples
+    --------
+    >>> y_true = np.array([0, 1, 1, 0])
+    >>> y_pred = np.array([0, 1, 0, 0])
+    >>> accuracy_score(y_pred, y_true)
+    0.75
+    """
 
     pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
     accuracy = float(np.mean(pred_class == true_class))
@@ -146,9 +317,52 @@ def confusion_matrix(predicted_classes: np.ndarray,
                      conf_matrix_labels: Optional[list] = None,
                      ) -> np.ndarray:
 
+    """
+    Calculates the confusion matrix, with the option to plot
+
+    Calculates each element in the confusion matrix as the number of occurrences
+    for a predicted label and true label pair, and displays an optional
+    heatmap of the matrix
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+    plot: bool, default = True
+        Whether to display a heatmap plot of the confusion matrix
+    display_value: bool, default = True
+        Determines whether to display the corresponding numbers in each cell
+    labels: sequence, optional
+        Sequence of labels corresponding to classes for class counts
+    conf_matrix_labels: list, optional
+        List of labels to display on confusion matrix axes; must match
+        dimensions of the matrix
+
+    Returns
+    -------
+    confusion_matrix: np.ndarray
+        2D array with shape (n_labels, n_labels) representing the confusion matrix; 
+        rows correspond to true labels and columns to predicted labels
+
+    Raises
+    ------
+    TypeError
+        If `plot` is not a boolean or `conf_matrix_labels` is not a list
+
+    Examples
+    --------
+    >>> y_true = np.array([0, 1, 1, 0])
+    >>> y_pred = np.array([0, 1, 0, 0])
+    >>> confusion_matrix(y_pred, y_true, plot = False)
+    array([[2., 0.],
+           [1., 1.]])
+    """
+
     if not isinstance(plot, bool):
         raise TypeError('Plot parameter must be a boolean')
-    if not isinstance(conf_matrix_labels, list):
+    if conf_matrix_labels is not None and not isinstance(conf_matrix_labels, list):
         raise TypeError('Confusion matrix labels must be a list')
     
     _, _, _, labels, confusion_matrix = _class_counts(predicted_classes, true_classes, labels)
@@ -165,6 +379,50 @@ def precision_score(predicted_classes: np.ndarray,
                     metric: Optional[Literal['binary', 'micro', 'macro']] = 'binary',
                     labels: Optional[Sequence] = None) -> Union[float, np.ndarray]:
     
+    """
+    Calculates precision score
+
+    Precision is calculated as the number of true positives divided by
+    the total number of predicted positives. This function calculates binary,
+    micro, macro, or per-class precision
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+    metric: {'binary', 'micro', 'macro'}, optional, default = 'binary'
+        Metric for calculating precision
+        - 'binary': precision for positive class in binary classification
+        - 'micro': calculated globally across all classes
+        - 'macro': calculated as the unweighted average of per-class precision
+        - None: returns an array of precision per class
+    labels: sequence, optional
+        Sequence of class labels; if None, these are inferred using the
+        predicted and true class arrays
+    
+    Returns
+    -------
+    float or np.ndarray
+        Precision score as a float ('binary', 'micro', 'macro') or as a 1D
+        array with per-class values ('None')
+
+    Raises
+    ------
+    ValueError
+        If `metric` is not in {'binary', 'micro', 'macro', None}, or
+        if more than two classes are used with 'binary' metric
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> y_true = np.array([0, 1, 1, 0])
+    >>> y_pred = np.array([0, 1, 0, 0])
+    >>> precision_score(y_pred, y_true, metric = 'binary')
+    1.0
+    """
+
     pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
 
     if metric not in ['binary', 'micro', 'macro', None]:
@@ -211,6 +469,50 @@ def recall_score(predicted_classes: np.ndarray,
                     metric: Optional[Literal['binary', 'micro', 'macro']] = 'binary',
                     labels: Optional[Sequence] = None) -> Union[float, np.ndarray]:
     
+    """
+    Calculates recall score
+
+    Recall is calculated as the number of true positives divided by
+    the total number of ground-truth positives. This function calculates binary,
+    micro, macro, or per-class recall
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+    metric: {'binary', 'micro', 'macro'}, optional, default = 'binary'
+        Metric for calculating recall
+        - 'binary': recall for positive class in binary classification
+        - 'micro': calculated globally across all classes
+        - 'macro': calculated as the unweighted average of per-class recall
+        - None: returns an array of recall per class
+    labels: sequence, optional
+        Sequence of class labels; if None, these are inferred using the
+        predicted and true class arrays
+    
+    Returns
+    -------
+    float or np.ndarray
+        Recall score as a float ('binary', 'micro', 'macro') or as a 1D
+        array with per-class values ('None')
+
+    Raises
+    ------
+    ValueError
+        If `metric` is not in {'binary', 'micro', 'macro', None}, or
+        if more than two classes are used with 'binary' metric
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> y_true = np.array([0, 1, 1, 0])
+    >>> y_pred = np.array([0, 1, 0, 0])
+    >>> recall_score(y_pred, y_true, metric = 'binary')
+    0.5
+    """
+     
     pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
 
     if metric not in ['binary', 'micro', 'macro', None]:
@@ -258,6 +560,49 @@ def f1_score(predicted_classes: np.ndarray,
                     metric: Optional[Literal['binary', 'micro', 'macro']] = 'binary',
                     labels: Optional[Sequence] = None) -> Union[float, np.ndarray]:
     
+    """
+    Calculates F1 score
+
+    F1 is calculated as the harmonic mean of precision and recall. This function 
+    calculates binary, micro, macro, or per-class F1 scores
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+    metric: {'binary', 'micro', 'macro'}, optional, default = 'binary'
+        Metric for calculating F1
+        - 'binary': F1 for positive class in binary classification
+        - 'micro': calculated globally across all classes
+        - 'macro': calculated as the unweighted average of per-class F1
+        - None: returns an array of F1 per class
+    labels: sequence, optional
+        Sequence of class labels; if None, these are inferred using the
+        predicted and true class arrays
+    
+    Returns
+    -------
+    float or np.ndarray
+        F1 score as a float ('binary', 'micro', 'macro') or as a 1D
+        array with per-class values ('None')
+
+    Raises
+    ------
+    ValueError
+        If `metric` is not in {'binary', 'micro', 'macro', None}, or
+        if more than two classes are used with 'binary' metric
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> y_true = np.array([0, 1, 1, 0])
+    >>> y_pred = np.array([0, 1, 0, 0])
+    >>> recall_score(y_pred, y_true, metric = 'micro')
+    0.75
+    """
+    
     pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
 
     if metric not in ['binary', 'micro', 'macro', None]:
@@ -297,7 +642,36 @@ def f1_score(predicted_classes: np.ndarray,
     
 def roc_auc(predicted_scores: np.ndarray, true_classes: np.ndarray) -> float:
 
-    # TODO: type hints/docstrings = rank-based method
+    """
+    Calculates area under the curve (AUC) for the Receiver Operating Characteristic (ROC)
+
+    Calculates ROC AUC for binary classification using the Wilcoxon rank-sum formula;
+    measures ability of the model to differentiate between positive and negative classes
+
+    Parameters
+    ----------
+    predicted_scores: np.ndarray
+        Array of predicted class probabilities
+    true_classes: np.ndarray
+        Array of true class labels
+
+    Returns
+    -------
+    auc: float
+        ROC AUC score between 0 and 1
+
+    Raises
+    ------
+    ValueError
+        If more than two classes are present in `true_classes`
+
+    Examples
+    --------
+    >>> y_true = np.array([0, 1, 1, 0])
+    >>> y_scores = np.array([0.1, 0.9, 0.8, 0.2])
+    >>> roc_auc(y_scores, y_true)
+    1.0
+    """
 
     pred_scores = _ensure_numeric(predicted_scores)
     pred_scores, true_class = _validate_vector_match(pred_scores, true_classes)
@@ -318,7 +692,41 @@ def roc_auc(predicted_scores: np.ndarray, true_classes: np.ndarray) -> float:
 
 def log_loss(predicted_scores: np.ndarray, true_classes: np.ndarray, epsilon: float = 1e-10) -> float:
 
-    # TODO: type hints, docstrings
+    """
+    Calculates log loss for binary and multi-class classification
+
+    Calculates log loss (binary cross-entropy loss) from predicted probabilities
+    to evaluate model performance while accounting for the confidence of predictions
+
+    Parameters
+    ----------
+    predicted_scores: np.ndarray
+        Array of predicted class probabilities
+    true_classes: np.ndarray
+        Array of true class labels
+    epsilon: float, default = 1e-10
+        Used to clip probabilities to avoid undefined calculations
+
+    Returns
+    -------
+    log_loss_mean: float
+        Average log loss score across all samples
+
+    Raises
+    ------
+    TypeError
+        If `epsilon` is not a float or integer
+    ValueError
+        If `epsilon` is not a finite positive value, probabilites do not
+        total 1 across rows, or true class labels cannot be mapped to columns
+
+    Examples
+    --------
+    >>> y_true = np.array([0, 1, 1, 0])
+    >>> y_scores = np.array([0.9, 0.8, 0.3, 0.1])
+    >>> log_loss(y_scores, y_true)
+    0.9587654910730045
+    """
 
     true_class, pred_scores, n_classes = _validate_probability(predicted_scores, true_classes)
 
@@ -353,8 +761,26 @@ def log_loss(predicted_scores: np.ndarray, true_classes: np.ndarray, epsilon: fl
 
     return log_loss_mean
 
-# TODO: unit tests for this
 def print_model_metrics(predicted_classes: np.ndarray, true_classes: np.ndarray) -> None:
+    
+    """
+    Prints the set of model evaluation metrics for classification
+
+    Includes accuracy, precision, recall, and F1 scores calculated using both
+    micro and macro metrics
+
+    Parameters
+    ----------
+    predicted_classes: np.ndarray
+        Array of predicted class labels
+    true_classes: np.ndarray
+        Array of true class labels
+
+    Raises
+    ------
+    ValueError
+        If the dimensions of `predicted_classes` and `true_classes` do not match
+    """
     
     pred_class, true_class = _validate_vector_match(predicted_classes, true_classes)
 

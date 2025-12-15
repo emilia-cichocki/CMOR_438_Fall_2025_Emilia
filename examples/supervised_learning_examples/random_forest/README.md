@@ -28,7 +28,6 @@ Random forests are an accurate and common ensemble method in machine learning, w
 - Computationally complex and can be time or memory-intensive
 - Difficult to interpret, especially compared to individual trees
 
-
 ## Evaluation
 Random forests can be evaluated with either standard classification or regression metrics. 
 
@@ -74,7 +73,6 @@ R^2_{\text{adj}} =
 1 - \left(1 - R^2\right)
 \frac{n - 1}{n - p - 1}
 $$
-
 
 ## Code Features
 Random forest models are implemented using the custom `random_forest` class from the supervised learning package. The following describes the class.

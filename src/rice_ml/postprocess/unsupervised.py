@@ -1,14 +1,23 @@
 
 """
-    Postprocessing utilities for unsupervised learning (Numpy)
-    # TODO: finish this!!
+    Postprocessing utilities for unsupervised learning (NumPy)
+    
+    This module calculates a comprehensive set of postprocessing and evaluation 
+    metrics for unsupervised learning algorithms, with support for NumPy arrays.
 
+    Functions
+    ---------
+    silhouette_score
+        Computes the silhouette score for cluster analysis
+    evaluate_clusters
+        Calculates and prints the number of clusters, noise points, and 
+        points per cluster
 """
 
 import numpy as np
 from typing import *
 from rice_ml.preprocess.datatype import *
-from rice_ml.supervised_learning.distances import _ensure_numeric # TODO: finish this!!
+from rice_ml.supervised_learning.distances import _ensure_numeric
 import collections
 from collections import Counter
 
@@ -19,6 +28,32 @@ __all__ = [
 
 def _validate_array_match(data_array: np.ndarray, label_array: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     
+    """
+    Validation of input vectors
+    
+    Converts the data array to a 2D numeric array, the label array to a 1D
+    numeric array, and checks that they have the same number of samples
+
+    Parameters
+    ----------
+    data_array: np.ndarray
+        Array of shape (n_samples, n_features)
+    label_array: np.ndarray
+        Array of labels with shape (n_samples,)
+
+    Returns
+    -------
+    data_array: np.ndarray
+        2D array of features for each sample
+    label_array: np.ndarray
+        1D array of labels
+
+    Raises
+    ------
+    ValueError
+        If data and label arrays have a different first dimension
+    """
+
     data_array = _2D_numeric(data_array)
     label_array = _ensure_numeric(label_array)
     if data_array.shape[0] != label_array.shape[0]:
@@ -28,7 +63,40 @@ def _validate_array_match(data_array: np.ndarray, label_array: np.ndarray) -> Tu
 
 def silhouette_score(data_array: np.ndarray, label_array: np.ndarray, ignore_noise: bool = False) -> float:
 
-    # TODO: type hints, docstrings
+    """
+    Computes the mean silhouette score across all samples
+
+    The silhouette score describes how close a sample is to other samples
+    in the same cluster compared to those in other clusters
+
+    Parameters
+    ----------
+    data_array: np.ndarray
+        Array of shape (n_samples, n_features)
+    label_array: np.ndarray
+        Array of cluster labels with shape (n_samples,)
+    ignore_noise: bool, default = False
+        Whether noise (samples labeled with -1) is ignored
+
+    Returns
+    -------
+    mean_score: float
+        Mean silhouette score over all samples
+
+    Raises
+    ------
+    TypeError
+        If the `ignore_noise` parameter is not a boolean
+    ValueError
+        If labels describe less than two clusters
+
+    Examples
+    --------
+    >>> X = np.array([[0, 0], [0, 1], [5, 5], [5, 6]])
+    >>> labels_with_noise = np.array([0, 0, 1, -1])
+    >>> silhouette_score(X, labels_with_noise, ignore_noise = True)
+    0.9008016272913615
+    """
 
     data_array, label_array = _validate_array_match(data_array, label_array)
     if not isinstance(ignore_noise, bool):
@@ -87,7 +155,37 @@ def silhouette_score(data_array: np.ndarray, label_array: np.ndarray, ignore_noi
 
 def evaluate_clusters(label_array: np.ndarray, print_eval: bool = True) -> Tuple[float, Union[float, str], collections.Counter]:
 
-    # TODO: type hints, docstrings
+    """
+    Calculates and optionally prints the set of cluster evaluation metrics
+
+    Includes number of clusters, number of noise points, and number of samples
+    in each cluster
+
+    Parameters
+    ----------
+    data_array: np.ndarray
+        Array of shape (n_samples, n_features)
+    label_array: np.ndarray
+        Array of cluster labels with shape (n_samples,)
+    print_eval: bool, default = True
+        Whether to print the cluster evaluation metrics
+
+    Returns
+    -------
+    n_clusters: int
+        Number of clusters, excluding noise
+    n_noise: int or str
+        Number of noise points (if present, otherwise the string
+        'No noise points')
+    cluster_counts: collections.Counter
+        Counter mapping cluster labels to number of samples
+
+    Raises
+    ------
+    TypeError
+        If the `print_eval` parameter is not a boolean
+
+    """
 
     label_array = _ensure_numeric(label_array)
     if not isinstance(print_eval, bool):
@@ -112,4 +210,6 @@ def evaluate_clusters(label_array: np.ndarray, print_eval: bool = True) -> Tuple
             print(f"  Cluster {cluster_label}: {count} points")
     
     return n_clusters, n_noise, cluster_counts
+
+
 # TODO: unit tests
