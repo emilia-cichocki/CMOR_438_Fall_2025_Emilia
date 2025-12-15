@@ -6,41 +6,23 @@
     supports classification, regression, various distance metrics ('euclidean', 'manhattan', 'minkowski'),
     and weightings. 
 
-    Functions
-    ---------
-    _validate_parameters
-        Ensures that all parameters are accepted
-    _validate_arrays
-        Ensures that provided arrays are of appropriate data type and dimension
-    _distance_calculations
-        Calculates pairwise distance between array rows
-    _neighbor_finding
-        Finds the distance and indices of the nearest neighbors to each query
-    _weighting_by_distance
-        Applies the specified weighting (uniform or based on distance)
-
     Classes
     ---------
-    _knn_foundation
-        Provides the base structure for KNN (fitting the model and implementing the algorithm)
-    knn_classifier
+    knn_classification
         Runs the KNN algorithm for classification
     knn_regressor
         Runs the KNN algorithm for regression
 """
 
-# TODO: finish editing the above description, add examples, and add a tiebreaker ability/warning for when k is even
-
 import numpy as np
 import pandas as pd
 from typing import *
-import math
 from rice_ml.preprocess.datatype import *
 from rice_ml.preprocess.split import *
 from rice_ml.supervised_learning.distances import _ensure_numeric, euclidean_distance, manhattan_distance, minkowski_distance
 
 __all__ = [
-    'knn_classifier',
+    'knn_classification',
     'knn_regressor',
 ]
 
@@ -51,7 +33,25 @@ def _validate_parameters(k: int,
                          weight: Literal['uniform', 'distance']
                          ) -> None:
 
-    # TODO: add docstrings
+    """
+    Validates hyperparameters for KNN
+
+    Parameters
+    ----------
+    k: int, optional
+        Number of nearest neighbors
+    metric: {'euclidean', 'manhattan', 'minkowski'}
+        Method of calculating distance
+    weight: {'uniform', 'distance'}
+        Method of weighting nearest neighbors
+
+    Raises
+    ------
+    TypeError
+        If parameters are not of valid types
+    ValueError
+        If parameters do not have appropriate values
+    """
 
     if not isinstance(k, (int, np.integer)):
         raise TypeError('k must be an integer')
@@ -67,7 +67,41 @@ def _validate_arrays(data_array: ArrayLike,
                      regression: bool = False
                      ) -> Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]:
 
-    # TODO: add docstrings
+    """
+    Ensures that data arrays are 2D and contain only numeric data,
+    ensures that label vectors are 1D, and checks that the shape of 
+    feature data and labels match
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        2D data array containing numeric values
+    label_vector: ArrayLike, optional
+        1D label vector (must contain numeric values if `regression` is True)
+    regression: bool, default = False
+        Whether `label_vector` should be treated as numeric targets
+
+    Returns
+    -------
+    array: np.ndarray
+        2D validated feature array
+    vector: np.ndarray (if `label_vector` is not None)
+        1D validated label vector
+
+    Raises
+    ------
+    TypeError
+        If regression is not a boolean
+    ValueError
+        If either input array contains NaN values or shapes of the two 
+        input arrays do not match
+
+    Examples
+    --------
+    >>> _validate_arrays([[1, 2], [3, 4]])
+    array([[1., 2.],
+           [3., 4.]])
+    """
 
     if not isinstance(regression, bool):
         raise TypeError(f'regression parameter must be a boolean, got {type(regression).__name__}')
@@ -95,7 +129,31 @@ def _distance_calculations(training_array: np.ndarray,
                            p: Optional[int] = 3
                            ) -> np.ndarray:
 
-    # TODO: docstrings, examples (query is row, training is column)
+    """
+    Computes the pairwise distances between a set of query points and
+    the training points
+
+    Parameters
+    ----------
+    training_array: np.ndarray
+        2D array of training data with size (n_samples, n_features)
+    query_array: np.ndarray
+        2D array of query data with size (n_queries, n_features)
+    metric: {'euclidean', 'manhattan', 'minkowski'}
+        Metric for calculating distance
+    p: int, optional, default = 3
+        Order used for Minkowski distance
+
+    Returns
+    -------
+    distance_matrix np.ndarray
+        2D distance matrix with size (query_samples, training_samples)
+
+    Examples
+    --------
+    >>> _distance_calculations([[0,0],[1,1]], [[1,0]], metric = 'euclidean')
+    array([[1., 1.]])
+    """
 
     query_array = _2D_numeric(query_array)
     training_array = _2D_numeric(training_array)
@@ -122,7 +180,40 @@ def _neighbor_finding(training_array: np.ndarray,
                       p: Optional[int] = 3
                       ) -> Tuple[np.ndarray, np.ndarray]:
     
-    # TODO: docstrings and examples, potentially add further checks for other inputs
+    """
+    Determines the k-nearest neighbors for each query point
+
+    Parameters
+    ----------
+    training_array: np.ndarray
+        2D array of training data with size (n_samples, n_features)
+    query_array: np.ndarray
+        2D array of query data with size (n_queries, n_features)
+    k: int
+        Number of nearest neighbors
+    metric: {'euclidean', 'manhattan', 'minkowski'}
+        Metric for calculating distance
+    p: int, optional, default = 3
+        Order used for Minkowski distance
+
+    Returns
+    -------
+    distances_sorted: np.ndarray
+        Sorted distances of nearest neighbors for each query point
+    sorted_indices: np.ndarray
+        Indices of the k-nearest neighbors to a query point in the 
+        training array
+
+    Raises
+    ------
+    ValueError
+        If k is larger than the number of training samples
+
+    Examples
+    --------
+    >>> _neighbor_finding(np.array([[0,0],[1,1]]), np.array([[0,1]]), k=1, metric='euclidean')
+    (array([[1.]]), array([[0]]))
+    """
 
     if k > training_array.shape[0]:
         raise ValueError(f'Number of neighbors (k = {k}) cannot be greater than number of training samples ({training_array.shape[0]})')
@@ -143,7 +234,29 @@ def _weighting_by_distance(distance_array: np.ndarray,
                            eps: float = 1e-10
                            ) -> np.ndarray:
 
-    # TODO: docstrings and examples
+    """
+    Computes weights for a neighbor to a query based on distance
+
+    Parameters
+    ----------
+    distance_array: np.ndarray
+        2D array of distances for neighbors to queries
+    weight: {'uniform', 'distance'}
+        Method used for weighting (uniform weight or inversely proportional
+        to distance)
+    eps: float, default = 1e-10
+        Small value to prevent zero division
+
+    Returns
+    -------
+    weight_matrix: np.ndarray
+        2D matrix with same size as distance_array
+
+    Examples
+    --------
+    >>> _weighting_by_distance([[0.5, 1.5]], weight='uniform')
+    array([[1., 1.]])
+    """
 
     distance_array = _validate_arrays(distance_array)
 
@@ -160,13 +273,37 @@ def _weighting_by_distance(distance_array: np.ndarray,
             weight_matrix[~exact_neighbor] = 1.0 / np.maximum(distance_array[~exact_neighbor], eps)
         
         return weight_matrix
-    
-
-
 
 class _knn_foundation:
 
-    # TODO: explanation/comments on the code
+    """
+    Foundation class for use in KNN classification and regression
+    
+    Covers k-nearest neighbor calculation, application of distance metrics, 
+    and weighting method
+
+    Attributes
+    ----------
+    k: int
+        Number of nearest neighbors
+    metric: {'euclidean', 'manhattan', 'minkowski'}, default = 'euclidean'
+        Distance metric used for nearest neighbor calculations
+    weight: {'uniform', 'distance'}, default = 'uniform'
+        Method for weighting neighbors
+    p: int, default = 3
+        Order for calculating Minkowski distance
+    _training: np.ndarray
+        Training data array, set after fitting
+    _labels: np.ndarray
+        Training label array, set after fitting
+
+    Methods
+    -------
+    fit(training_array, training_labels):
+        Fits the KNN based on training values and numeric data
+    knn_implement(query_data):
+        Finds the distances and indices of the nearest neighbors to a query
+    """
 
     def __init__(self, 
                  k: int = 3, 
@@ -176,7 +313,21 @@ class _knn_foundation:
                  p: Optional[int] = 3
                  ) -> None:
 
-        # TODO: explanation or additional comments if necessary
+        """
+        Creates associated attributes for a base KNN with
+        validated parameters
+
+        Parameters
+        ----------
+        k: int
+        Number of nearest neighbors
+        metric: {'euclidean', 'manhattan', 'minkowski'}, default = 'euclidean'
+            Distance metric used for nearest neighbor calculations
+        weight: {'uniform', 'distance'}, default = 'uniform'
+            Method for weighting neighbors
+        p: int, default = 3
+            Order for calculating Minkowski distance
+        """
         
         _validate_parameters(k, metric, weight)
 
@@ -187,9 +338,29 @@ class _knn_foundation:
         self._training: Optional[np.ndarray] = None
         self._labels: Optional[np.ndarray] = None
 
-    def fit(self, training_array: np.ndarray, training_labels: np.ndarray, regression: bool):
+    def fit(self, training_array: np.ndarray, training_labels: np.ndarray, regression: bool) -> "_knn_foundation":
 
-        # TODO: account for regression in the line below, fix the dimension of training_labels
+        """
+        Fits the KNN on given input data
+
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_labels: ArrayLike
+            1D array-like object containing training labels
+
+        Returns
+        -------
+        _knn_foundation
+            Fitted model
+
+        Raises
+        ------
+        ValueError
+            If number of neighbors is greater than number of training samples
+        """
+        
         training_array, training_labels = _validate_arrays(training_array, training_labels, regression = regression)
 
         if self.n_neighbors > training_array.shape[0]:
@@ -204,6 +375,11 @@ class _knn_foundation:
         return self
     
     def _verify_fit(self) -> Tuple[np.ndarray, np.ndarray]:
+
+        """
+        Verifies that the KNN model has been fitted
+        """
+
         if self._training is None or self._labels is None:
             raise RuntimeError("Model is not fitted; call fit(training_array, training_labels)")
 
@@ -211,6 +387,28 @@ class _knn_foundation:
     
     def knn_implement(self, query_data: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 
+        """
+        Computes the k-nearest neighbors for each query point
+
+        Parameters
+        ----------
+        query_data: np.ndarray
+            2D array of query points with size (n_queries, n_features)
+        Returns
+        -------
+        distances: np.ndarray
+            2D array of distances from each query point to its nearest neighbors
+        indices : np.ndarray
+            2D of indices of the nearest neighbors for each query point
+
+        Raises
+        ------
+        ValueError
+            If query data has a different number of features than training data
+        RuntimeError
+            If the model has not been fitted
+        """
+    
         query_array = _2D_numeric(query_data)
         training_array, training_labels = self._verify_fit()
 
@@ -221,10 +419,47 @@ class _knn_foundation:
 
         return distances, indices
     
-
 class knn_classification(_knn_foundation):
 
-    # TODO: explanation/comments on the code
+    """
+    Implements the KNN classification algorithm using the foundational KNN
+    class
+
+    Attributes
+    ----------
+    k: int
+        Number of nearest neighbors
+    metric: {'euclidean', 'manhattan', 'minkowski'}, default = 'euclidean'
+        Distance metric used for nearest neighbor calculations
+    weight: {'uniform', 'distance'}, default = 'uniform'
+        Method for weighting neighbors
+    p: int, default = 3
+        Order for calculating Minkowski distance
+    _training: np.ndarray
+        Training data array, set after fitting
+    _labels: np.ndarray
+        Training label array, set after fitting
+    classes_: np.ndarray
+        Classes for the data
+
+    Methods
+    -------
+    fit(training_array, training_labels):
+        Fits the KNN classifier based on training values and numeric data
+    probabilities(query_data):
+        Computes the probability of each label for a query sample
+    prediction(query_data):
+        Predicts the class label for a query sample
+    scoring(query_data, actual_labels)
+        Scores the classifier using accuracy
+    
+    Examples
+    --------
+    >>> knn = knn_classification(k=3)
+    >>> _ = knn.fit([[0,0],[1,1],[2,2]], [0,1,1])
+    >>> knn.prediction([[1,0]])
+    array([1])
+    """
 
     def __init__(self, 
                  k: int = 3, 
@@ -234,14 +469,47 @@ class knn_classification(_knn_foundation):
                  p: Optional[int] = 3
                  ) -> None:
         
-        # TODO: docstrings
+        """
+        Creates associated attributes for a KNN classifier with
+        validated parameters
+
+        Parameters
+        ----------
+        k: int
+        Number of nearest neighbors
+        metric: {'euclidean', 'manhattan', 'minkowski'}, default = 'euclidean'
+            Distance metric used for nearest neighbor calculations
+        weight: {'uniform', 'distance'}, default = 'uniform'
+            Method for weighting neighbors
+        p: int, default = 3
+            Order for calculating Minkowski distance
+        """
 
         super().__init__(k = k, metric = metric, weight = weight, p = p)
         self.classes_: Optional[np.ndarray] = None
 
     def fit(self, training_array: np.ndarray, training_labels: np.ndarray) -> 'knn_classification':
 
-        # TODO: docstrings
+        """
+        Fits the KNN on given input data
+
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_labels: ArrayLike
+            1D array-like object containing training labels
+
+        Returns
+        -------
+        knn_classification
+            Fitted KNN classification model
+
+        Raises
+        ------
+        ValueError
+            If number of neighbors is greater than number of training samples
+        """
 
         super().fit(training_array, training_labels, regression = False)
         self.classes_ = np.unique(self._labels)
@@ -250,7 +518,29 @@ class knn_classification(_knn_foundation):
 
     def probabilities(self, query_data: np.ndarray) -> np.ndarray:
         
-        # TODO: docstrings
+        """
+        Computes probabilities that a query sample belongs to a given class
+
+        Applies the given weighting metric in computing probabilities
+        based on neighbor distance, if applicable
+
+        Parameters
+        ----------
+        query_data: np.ndarray
+            2D data array with size (n_queries, n_features)
+
+        Returns
+        -------
+        probability_matrix: np.ndarray
+            2D array of size (n_queries, n_classes) containing probabilites that
+            a sample belongs to a class
+
+        Raises
+        ------
+        ValueError
+            If the number of features in `query_data` does not match the number of 
+            training features, or if `query_data` contains non-numeric values
+        """
         
         distances, indices = self.knn_implement(query_data)
         weighting = self.weight
@@ -275,17 +565,45 @@ class knn_classification(_knn_foundation):
     
     def prediction(self, query_data: np.ndarray) -> np.ndarray:
 
-        # TODO: docstrings
+        """
+        Predicts the target class for given query samples
+
+        Parameters
+        ----------
+        query_data: ArrayLike
+            2D array-like object of size (n_queries, n_features)
+
+        Returns
+        -------
+        pred: np.ndarray
+            Array of predicted target class for each sample
+        """
 
         probability_matrix = self.probabilities(query_data)
 
         max_prob_location = np.argmax(probability_matrix, axis = 1)
         
-        return self.classes_[max_prob_location]
+        pred = self.classes_[max_prob_location]
+
+        return pred
     
     def scoring(self, query_data: ArrayLike, actual_labels: ArrayLike) -> float:
 
-        # TODO: docstrings
+        """
+        Calculates accuracy score for classification on query data
+
+        Parameters
+        ----------
+        query_data: ArrayLike
+            2D array-like object of size (n_queries, n_features)
+        actual_labels: ArrayLike
+            1D array-like object of true labels with size (n_queries,)
+
+        Returns
+        -------
+        mean_accuracy: float
+            Mean accuracy of the predictions
+        """
 
         predicted_labels_array = self.prediction(query_data)
         actual_labels_array = _1D_vectorized(actual_labels)
@@ -301,7 +619,45 @@ class knn_classification(_knn_foundation):
 
 class knn_regressor(_knn_foundation):
 
-    # TODO: explanation/comments on the code
+    """
+    Implements the KNN regression algorithm using the foundational KNN
+    class
+
+    Attributes
+    ----------
+    k: int
+        Number of nearest neighbors
+    metric: {'euclidean', 'manhattan', 'minkowski'}, default = 'euclidean'
+        Distance metric used for nearest neighbor calculations
+    weight: {'uniform', 'distance'}, default = 'uniform'
+        Method for weighting neighbors
+    p: int, default = 3
+        Order for calculating Minkowski distance
+    _training: np.ndarray
+        Training data array, set after fitting
+    _labels: np.ndarray
+        Training label array, set after fitting
+
+    Methods
+    -------
+    fit(training_array, training_labels):
+        Fits the KNN classifier based on training values and numeric data
+    prediction(query_data):
+        Predicts the class label for a query sample
+    scoring(query_data, actual_targets)
+        Scores the classifier using accuracy
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> X_train = np.array([[1], [2], [3], [4]])
+    >>> y_train = np.array([1.0, 2.0, 1.5, 3.5])
+    >>> knn = knn_regressor(k=2)
+    >>> _ = knn.fit(X_train, y_train)
+    >>> X_test = np.array([[2.5]])
+    >>> knn.prediction(X_test)
+    array([1.75])
+    """
 
     def __init__(self, 
                  k: int = 3, 
@@ -311,13 +667,46 @@ class knn_regressor(_knn_foundation):
                  p: Optional[int] = 3
                  ) -> None:
         
-        # TODO: docstrings
+        """
+        Creates associated attributes for a KNN regressor with
+        validated parameters
+
+        Parameters
+        ----------
+        k: int
+            Number of nearest neighbors
+        metric: {'euclidean', 'manhattan', 'minkowski'}, default = 'euclidean'
+            Distance metric used for nearest neighbor calculations
+        weight: {'uniform', 'distance'}, default = 'uniform'
+            Method for weighting neighbors
+        p: int, default = 3
+            Order for calculating Minkowski distance
+        """
 
         super().__init__(k = k, metric = metric, weight = weight, p = p)
 
     def fit(self, training_array: np.ndarray, training_labels: np.ndarray) -> 'knn_regressor':
+        
+        """
+        Fits the KNN on given input data
 
-        # TODO: docstrings
+        Parameters
+        ----------
+        training_array: ArrayLike
+            2D array-like object containing training data
+        training_labels: ArrayLike
+            1D array-like object containing training values
+
+        Returns
+        -------
+        knn_regressor
+            Fitted model
+
+        Raises
+        ------
+        ValueError
+            If number of neighbors is greater than number of training samples
+        """
 
         super().fit(training_array, training_labels, regression = True)
     
@@ -325,7 +714,20 @@ class knn_regressor(_knn_foundation):
     
     def prediction(self, query_data: np.ndarray) -> np.ndarray:
         
-        # TODO: docstrings
+        """
+        Predicts the target values for given query samples, applying
+        a given weighting method
+
+        Parameters
+        ----------
+        query_data: ArrayLike
+            2D array-like object of size (n_queries, n_features)
+
+        Returns
+        -------
+        predicted_targets: np.ndarray
+            Array of predicted target values for each sample
+        """
         
         distances, indices = self.knn_implement(query_data)
         weighting = self.weight
@@ -346,7 +748,22 @@ class knn_regressor(_knn_foundation):
     
     def scoring(self, query_data: ArrayLike, actual_targets: ArrayLike) -> float:
 
-        # TODO: docstrings
+        
+        """
+        Calculates R2 score for regression on query data
+
+        Parameters
+        ----------
+        query_data: ArrayLike
+            2D array-like object of size (n_queries, n_features)
+        actual_targets: ArrayLike
+            1D array-like object of true target values with size (n_queries,)
+
+        Returns
+        -------
+        r2_score: float
+            R2 score for the predictions
+        """
 
         predicted_target_array = self.prediction(query_data)
         actual_target_array = _ensure_numeric(actual_targets)

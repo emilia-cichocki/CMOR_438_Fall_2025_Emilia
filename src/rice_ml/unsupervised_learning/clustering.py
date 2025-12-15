@@ -1,20 +1,18 @@
+
 """
     Clustering algorithms (NumPy)
 
     This module implements several clustering algorithms (k-means clustering and DBSCAN)
-
-    # TODO: finish this!
-
-    Functions
-    ---------
-    
+    on numeric NumPy arrays. It supports Euclidean distance calculations for unsupervised
+    cluster detection.
 
     Classes
     ---------
-   
+    k_means
+        Implements the k-means algorithm using Euclidean distance
+    dbscan
+        Implements the DBSCAN algorithm using Euclidean distance
 """
-
-# TODO: finish above! and check below for redundant imports
 
 __all__ = [
     'k_means',
@@ -24,7 +22,6 @@ __all__ = [
 import numpy as np
 import pandas as pd
 from typing import *
-import warnings
 from rice_ml.preprocess.datatype import *
 from rice_ml.preprocess.split import _random_number
 from rice_ml.supervised_learning.distances import _ensure_numeric, euclidean_distance
@@ -32,6 +29,28 @@ from rice_ml.supervised_learning.distances import _ensure_numeric, euclidean_dis
 ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.DataFrame, pd.Series]
 
 def _validate_parameters_k_means(n_clusters: int, max_iterations: int, tol: float, random_state: Optional[int] = None) -> None:
+    
+    """
+    Validates hyperparameters for k-means clustering
+
+    Parameters
+    ----------
+    n_clusters: int
+        Number of clusters
+    max_iterations: int
+        Maximum number of iterations
+    tol: float
+        Tolerance for centroid shifts
+    random_state: int, optional
+        Random state, used when selecting initial centroids
+
+    Raises
+    ------
+    TypeError
+        If parameters are not of valid types
+    ValueError
+        If parameters do not have appropriate values
+    """
 
     if not isinstance(n_clusters, int):
         raise TypeError('Number of clusters must be an integer')
@@ -49,13 +68,77 @@ def _validate_parameters_k_means(n_clusters: int, max_iterations: int, tol: floa
         raise TypeError('Random state must be an integer')
 
 class k_means():
+
+    """
+    Class implementing k-means clustering with Euclidean distance
     
+    Covers centroid initialization, distance calculations and clustering,
+    inertia scoring, and centroid updates
+
+    Attributes
+    ----------
+    n_clusters: int
+        Number of clusters
+    max_iter: int
+        Maximum number of iterations
+    tol: float
+        Tolerance for centroid shifts
+    random_state: int or None
+        Random state, used when selecting initial centroids
+    cluster_labels: np.ndarray, optional
+        Array of determined cluster labels
+    centroids_: np.ndarray, optional
+        Array denoting cluster centroids
+    inertia_: float, optional
+        Inertia calculation for final clustering
+    n_features_: int, optional
+        Number of features in the data set
+
+    Methods
+    -------
+    fit(training_array):
+        Fits the k-means model based on numeric data
+    prediction(testing_array):
+        Assigns cluster predictions to previously unseen data (not common
+        in practice, but included for functionality)
+
+    Examples
+    --------
+    >>> X = np.array([[1, 2], [1, 4], [1, 0],
+    ...               [10, 2], [10, 4], [10, 0]])
+    >>> model = k_means(n_clusters=2, max_iterations=100, random_state=42)
+    >>> _ = model.fit(X)
+    >>> model.centroids_
+    array([[ 1.,  2.],
+           [10.,  2.]])
+    >>> model.prediction(np.array([[0, 0], [12, 3]]))
+    array([0, 1])
+    >>> model.inertia_ > 0
+    True
+    """
+
     def __init__(self,
                 n_clusters: int,
                 max_iterations: int,
                 tol: float = 1e-6,
                 random_state: Optional[int] = None) -> None:
         
+        """
+        Creates associated attributes for the k-means model with
+        validated parameters
+
+        Parameters
+        ----------
+        n_clusters: int
+            Number of clusters
+        max_iter: int
+            Maximum number of iterations
+        tol: float
+            Tolerance for centroid shifts
+        random_state: int, optional
+            Random state, used when selecting initial centroids
+        """
+
         _validate_parameters_k_means(n_clusters, max_iterations, tol, random_state)
 
         self.n_clusters = n_clusters
@@ -67,10 +150,13 @@ class k_means():
         self.inertia_: Optional[float] = None
         self.n_features_: Optional[int] = None
         
-
     def _initial_centroids(self, training_array: np.ndarray) -> np.ndarray:
 
-        train_array = _2D_numeric(training_array) # TODO: move this so it isn't redundant
+        """
+        Selecting the initial centroids out of the input data
+        """
+
+        train_array = _2D_numeric(training_array)
         rng = _random_number(self.random_state)
         centroid_indices = rng.choice(train_array.shape[0], self.n_clusters, replace = False)
         initial_centroids = train_array[centroid_indices]
@@ -78,6 +164,11 @@ class k_means():
         return initial_centroids
     
     def _distance_calc(self, training_array: np.ndarray, centroid_array: np.ndarray) -> np.ndarray:
+
+        """
+        Computing pairwise distances between input data points and the cluster
+        centroids
+        """
 
         distance_array = np.full((training_array.shape[0], self.n_clusters), np.nan)
 
@@ -94,6 +185,11 @@ class k_means():
     
     def _clustering(self, training_array: np.ndarray, centroid_array: np.ndarray) -> np.ndarray:
 
+        """
+        Finds the cluster that is closest to each input sample
+        and assigns associated labels
+        """
+        
         centroids = _2D_numeric(centroid_array)
         distance_array = self._distance_calc(training_array, centroids)
         cluster_indices = np.argmin(distance_array, axis = 1)
@@ -102,6 +198,11 @@ class k_means():
     
     def _updated_centroids(self, training_array: np.ndarray, cluster_labels: np.ndarray) -> np.ndarray:
 
+        """
+        Updates centroids by calculating the average of all points in
+        a cluster
+        """
+        
         updated_centroids = np.full((self.n_clusters, training_array.shape[1]), np.nan)
 
         rng = _random_number(self.random_state)
@@ -119,6 +220,10 @@ class k_means():
     
     def _inertia(self, training_array: np.ndarray, centroid_array: np.ndarray, cluster_indices_array: np.ndarray) -> float:
 
+        """
+        Calculates inertia of the clustering scheme as the sum of squared distance
+        """
+        
         cluster_indices = _ensure_numeric(cluster_indices_array).astype(int)
         distance_array = self._distance_calc(training_array, centroid_array)
 
@@ -129,6 +234,26 @@ class k_means():
         return final_distance
     
     def fit(self, training_array: np.ndarray) -> 'k_means':
+
+        """
+        Fits the k-means clustering model on given input data
+
+        Parameters
+        ----------
+        training_array: np.ndarray
+            2D array-like object containing training data with size
+            (n_samples, n_features)
+
+        Returns
+        -------
+        k_means
+            Fitted k-means clustering model
+
+        Raises
+        ------
+        ValueError
+            If the training array contains non-numeric data
+        """
 
         train_array = _2D_numeric(training_array)
 
@@ -156,12 +281,33 @@ class k_means():
         return self
 
     def _verify_fit(self):
+
+        """
+        Verifies that the model has been fitted
+        """
+
         if self.centroids_ is None or self.cluster_labels is None or self.inertia_ is None:
             raise RuntimeError("Model is not fitted; call fit(training_array)")
 
         return self
 
     def prediction(self, testing_array: ArrayLike) -> np.ndarray:
+
+        """
+        Assigns input samples to an existing cluster
+
+        Parameters
+        ----------
+        testing_array: ArrayLike
+            2D array-like object with testing samples
+
+        Returns
+        -------
+        cluster_predictions: np.ndarray
+            Array of cluster for each sample
+        """
+
+        self._verify_fit()
 
         test_array = _2D_numeric(testing_array)
 
@@ -172,9 +318,26 @@ class k_means():
 
         return cluster_predictions
     
-# TODO: maybe add transform?
 
 def _validate_parameters_dbscan(epsilon: float, core_point_min: int) -> None:
+    
+    """
+    Validates hyperparameters for DBSCAN
+
+    Parameters
+    ----------
+    epsilon: float
+        Value used to define neighborhoods
+    core_point_min: int
+        Minimum number of neighbors required to be considered a core point
+
+    Raises
+    ------
+    TypeError
+        If parameters are not of valid types
+    ValueError
+        If parameters do not have appropriate values
+    """
 
     if not isinstance(epsilon, (float, int)):
         raise TypeError('Epsilon must be a float or integer')
@@ -187,10 +350,57 @@ def _validate_parameters_dbscan(epsilon: float, core_point_min: int) -> None:
     
 class dbscan():
 
+    """
+    Class implementing DBSCAN with Euclidean distance
+    
+    Covers core point calculations, identification of noise points,
+    and cluster assignments
+
+    Attributes
+    ----------
+    epsilon: float
+        Value used to define neighborhoods
+    min_points: int
+        Minimum number of neighbors required to be considered a core point
+    cluster_labels: np.ndarray, optional
+        Array of determined cluster labels
+    core_point_indices: np.ndarray, optional
+        Indices of core points
+
+    Methods
+    -------
+    fit(training_array):
+        Fits the DBSCAN model based on numeric data
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> X = np.array([[1, 2], [2, 2], [1, 3],
+    ...               [10, 10], [10, 11], [11, 10]])
+    >>> model = dbscan(epsilon = 1.5, core_point_min = 2)
+    >>> _ = model.fit(X)
+    >>> model.cluster_labels
+    array([0, 0, 0, 1, 1, 1])
+    >>> model.core_sample_indices_
+    array([0, 1, 2, 3, 4, 5])
+    """
+
     def __init__(self,
                  epsilon: float,
                  core_point_min: int) -> None:
         
+        """
+        Creates associated attributes for the DBSCAN model with
+        validated parameters
+
+        Parameters
+        ----------
+        epsilon: float
+            Value used to define neighborhoods
+        core_point_min: int
+            Minimum number of neighbors required to be considered a core point
+        """
+
         _validate_parameters_dbscan(epsilon, core_point_min)
 
         self.epsilon = epsilon
@@ -199,6 +409,10 @@ class dbscan():
         self.core_point_indices: Optional[np.ndarray] = None
 
     def _distance_calc(self, training_array: np.ndarray) -> np.ndarray:
+
+        """
+        Calculates pairwise distances between points in the input data
+        """
 
         n_features = training_array.shape[0]
         distance_array = np.full((n_features, n_features), np.nan)
@@ -214,12 +428,17 @@ class dbscan():
     
     def _find_neighbors(self, point_index: int, distance_array: np.ndarray) -> list:
         
+        """
+        Finds neighboring points for all points in the input data 
+        """
+
         distances = _2D_numeric(distance_array)
         if not isinstance(point_index, int):
             raise TypeError('Point index must be an integer')
         if point_index < 0:
             raise ValueError('Point index must be non-negative')
-        
+        if point_index >= distances.shape[0]:
+            raise ValueError('Point index is out of range')
         neighbors = np.where(distances[point_index] <= self.epsilon)[0]
         neighbors = neighbors.tolist()
 
@@ -232,6 +451,11 @@ class dbscan():
                        cluster_id: int,
                        distance_array: np.ndarray) -> None:
         
+        """
+        Recursively expands a clustering region; begins with a given point
+        and recruits additional neighboring points
+        """
+
         cluster_labels[point_index] = cluster_id
 
         i = 0
@@ -251,6 +475,29 @@ class dbscan():
             i += 1
 
     def fit(self, training_array: ArrayLike) -> 'dbscan':
+
+        """
+        Fits the DBSCAN model on given input data
+
+        Assigns integer cluster labels to each points, and gives noise points
+        a label of -1
+
+        Parameters
+        ----------
+        training_array: np.ndarray
+            2D array-like object containing training data with size
+            (n_samples, n_features)
+
+        Returns
+        -------
+        dbscan
+            Fitted DBSCAN model
+
+        Raises
+        ------
+        ValueError
+            If the training array contains non-numeric data
+        """
 
         train_array = _2D_numeric(training_array)
         n_samples = train_array.shape[0]

@@ -34,7 +34,35 @@ ArrayLike = Union[np.ndarray, Sequence[float], Sequence[Sequence[float]], pd.Dat
 
 def z_score_standardize(data_array: ArrayLike, return_params: bool = False, ddof: int = 0) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     
-    # TODO: add type hints/docstrings/examples
+    """
+    Standardizes a data array using z-score normalization
+
+    Each feature (columns in the array) is centered by the mean
+    of the feature and then divided by its standard deviation
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        Input array-like object shape (n_samples, n_features)
+    return_params: bool, default = False
+        Whether the mean and scale should be returned
+    ddof: int, default = 0
+        Delta degrees of freedom used to calculate scale (standard deviation)
+
+    Returns
+    -------
+    standardized_array: np.ndarray
+        2D array with columns standardized using z-scores
+    dict (if `return_params` is True)
+        Dictionary with mean and scale values
+
+    Raises
+    ------
+    TypeError
+        If `return_params` is not a boolean or `ddof` is not an integer
+    ValueError
+        If `ddof` is negative or `data_array` contains non-numeric values
+    """
 
     array = _2D_numeric(data_array)
 
@@ -59,7 +87,37 @@ def z_score_standardize(data_array: ArrayLike, return_params: bool = False, ddof
 
 def min_max_standardize(data_array: ArrayLike, *, feature_range: Tuple[float, float] = (0.0, 1.0), return_params: bool = False) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
 
-    # TODO: add type hints/docstrings/examples
+    """
+    Standardizes a data array using min-max normalization
+
+    Each feature (columns in the array) is scaled to a given range
+    using the respective minimum and maximum values
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        Input array-like object shape (n_samples, n_features)
+    feature_range: tuple, default = (0.0, 1.0)
+        Range (min, max) of the transformed data
+    return_params: bool, default = False
+        Whether the minimum, maximum, scale, and feature range should be returned
+
+    Returns
+    -------
+    standardized_array: np.ndarray
+        2D array with columns standardized using min-max normalization
+    dict (if `return_params` is True)
+        Dictionary with minimum, maximum, scale, and feature range
+
+    Raises
+    ------
+    TypeError
+        If `feature_range` is not a tuple with float or integer elements,
+        or if `return_params` is not a boolean
+    ValueError
+        If `data_array` contains non-numeric values, or if the desired minimum
+        is greater than the desired maximum
+    """
 
     array = _2D_numeric(data_array)
     
@@ -85,7 +143,33 @@ def min_max_standardize(data_array: ArrayLike, *, feature_range: Tuple[float, fl
 
 def max_abs_standardize(data_array: ArrayLike, return_params: bool = False) -> Union[np.ndarray, Tuple[np.ndarray, dict]]:
     
-    # TODO: add type hints/docstrings/examples
+    """
+    Standardizes a data array using maximum absolute values
+
+    Each feature (columns in the array) is scaled using the maximum
+    absolute value from the feature, resulting in data between -1 and 1
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        Input array-like object shape (n_samples, n_features)
+    return_params: bool, default = False
+        Whether the scale should be returned
+
+    Returns
+    -------
+    standardized_array: np.ndarray
+        2D array with columns standardized using max-absolute normalization
+    dict (if `return_params` is True)
+        Dictionary with scale
+
+    Raises
+    ------
+    TypeError
+        If `return_params` is not a boolean
+    ValueError
+        If `data_array` contains non-numeric values
+    """
 
     array = _2D_numeric(data_array)
 
@@ -103,7 +187,31 @@ def max_abs_standardize(data_array: ArrayLike, return_params: bool = False) -> U
 
 def l2_standardize(data_array: ArrayLike, epsilon: float = 1e-15) -> np.ndarray:
 
-    # TODO: add type hints/docstrings/examples
+    """
+    Standardizes a data array using L2 norms
+
+    Each row in the array is scaled such that the L2 norm is equal to 1
+
+    Parameters
+    ----------
+    data_array: ArrayLike
+        Input array-like object shape (n_samples, n_features)
+    epsilon: float, default = 1e-15
+        Small scale value used to prevent zero division
+
+    Returns
+    -------
+    standardized_array: np.ndarray
+        2D array with rows standardized using L2 normalization
+
+    Raises
+    ------
+    TypeError
+        If `epsilon` is not an integer or float
+    ValueError
+        If `data_array` contains non-numeric values, or if `epsilon`
+        is not positive
+    """
 
     array = _2D_numeric(data_array)
 

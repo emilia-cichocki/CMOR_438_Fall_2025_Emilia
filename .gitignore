@@ -1,4 +1,4 @@
-#Virtual environments
+# Virtual environments
 .venv/
 venv/
 env/
@@ -6,14 +6,17 @@ ENV/
 *.env
 *.venv
 
-#IDEs
+# IDEs
 .vscode/
 .idea/
 *.iml
 
-#System files (MacOS and Windows)
+# System files (MacOS and Windows)
 .DS_Store
 Thumbs.db
 
-#Jupyter Notebook checkpoints
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints
+
+# Package metadata
+*.egg-info/
