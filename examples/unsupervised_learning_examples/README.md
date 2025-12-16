@@ -5,10 +5,10 @@ Unsupervised learning refers to a form of machine learning that independently le
 
 ### Contents
 This folder contains example implementations for each of the custom-built unsupervised learning algorithms. It includes four algorithms distributed across the following subfolders:
-1. *Community Detection* (Label Propagation)
+1. *Community Detection (Label Propagation)*
 2. *DBSCAN*
 3. *K-Means*
-4. *Principal Component Analysis* (PCA)
+4. *Principal Component Analysis (PCA)*
 
 ### Subfolder Contents 
 Every folder for a machine learning algorithm contains a notebook that demonstrates the application of the relevant algorithm (i.e., classification or regression) on a sample dataset. The structure of notebooks is shared among all examples, and includes (where applicable):
