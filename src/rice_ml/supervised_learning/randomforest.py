@@ -128,7 +128,7 @@ class random_forest():
     >>> preds = model.prediction(X)
     >>> preds.shape
     (4,)
-    >>> set(preds)
+    >>> set(preds.astype(int))
     {0, 1}
     """
 

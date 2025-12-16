@@ -259,8 +259,8 @@ class linear_regression:
     >>> preds = model.prediction(np.array([[5], [6]]))
     >>> preds
     array([10., 12.])
-    >>> model.scoring(X, y)
-    1.0
+    >>> bool(model.scoring(X, y) == 1.0)
+    True
     """
 
     def __init__(self,
@@ -516,8 +516,8 @@ class logistic_regression():
     array([1, 1])
     >>> model.predict_proba(np.array([[1.5], [2.5]]))
     array([0.59869776, 0.9333179 ])
-    >>> model.scoring(X, y)
-    1.0
+    >>> bool(model.scoring(X, y) == 1.0)
+    True
     """
 
     def __init__(self,
