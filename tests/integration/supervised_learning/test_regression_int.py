@@ -23,6 +23,7 @@ def test_linear_regression_fit_basic_sgd():
     linreg = linear_regression('gradient_descent', True, learning_rate = 0.01, epochs = 1000)
     linreg.fit(train_array, train_targets, None)
     assert isinstance(linreg.coef_, np.ndarray)
+    assert isinstance(linreg.error_, list)
     assert np.isscalar(linreg.intercept_)
     assert linreg.coef_.shape == (1,)
     assert np.allclose(linreg.coef_, np.array([3]))
@@ -480,13 +481,13 @@ def test_linear_regression_scoring_unfit():
     with pytest.raises(RuntimeError):
         linreg.scoring(test_array, actual_array)
 
-
 def test_logistic_regression_fit_basic():
     train_array = np.array([[0], [1], [2], [3], [4]])
     train_targets = np.array([0, 0, 1, 1, 1])
     logreg = logistic_regression(epochs = 1000, learning_rate = 0.01)
     logreg.fit(train_array, train_targets)
     assert isinstance(logreg.coef_, np.ndarray)
+    assert isinstance(logreg.loss_, list)
     assert np.isscalar(logreg.bias_)
     assert logreg.coef_.shape == (1,)
     assert logreg.coef_[0] > 0
@@ -789,6 +790,26 @@ def test_logistic_regression_prediction_threshold():
     test_array = np.array([[1], [1]])
     with pytest.raises(TypeError):
         logreg.prediction(test_array, '0.5')
+
+def test_logistic_regression_predict_proba_basic():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5], [3.5]])
+    classification = logreg.predict_proba(test_array)
+    assert isinstance(classification, np.ndarray) 
+    assert classification.shape == (2,)
+    assert np.all((classification >= 0) & (classification <= 1))
+
+def test_logistic_regression_predict_proba_dimensions():
+    train_array = np.array([[0], [1], [2], [3], [4]])
+    train_targets = np.array([0, 0, 1, 1, 1])
+    logreg = logistic_regression(1000, 0.01)
+    logreg.fit(train_array, train_targets)
+    test_array = np.array([[2.5, 0], [3.5, 0]])
+    with pytest.raises(ValueError):
+        logreg.predict_proba(test_array)
 
 def test_logistic_regression_scoring_basic():
     train_array = np.array([[0], [1], [2], [3], [4]])

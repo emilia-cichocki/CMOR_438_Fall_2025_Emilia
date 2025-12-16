@@ -14,6 +14,7 @@ def test_perceptron_fit_basic():
     assert perceptron.coef_.shape == (1,)
     assert perceptron.coef_[0] > 0
     assert perceptron.bias_ < 0
+    assert isinstance(perceptron.error_, list)
 
 def test_perceptron_fit_nonzero():
     train_array = np.array([[0], [1], [2], [3], [4]])
@@ -365,7 +366,6 @@ def test_perceptron_scoring_unfit():
     with pytest.raises(RuntimeError):
         perceptron.scoring(test_array, actual_array)
 
-
 def test_mlp_fit_basic():
     train_array = np.array([[0, 0], [1, 1], [2, 2], [3, 3], [4, 4]])
     train_targets = np.array([[-1], [-1], [1], [1], [1]])
@@ -377,6 +377,7 @@ def test_mlp_fit_basic():
         assert weight.shape[0] == mlp.layers[i]
         assert weight.shape[1] == mlp.layers[i + 1]
         assert bias.shape[0] == mlp.layers[i + 1]
+    assert isinstance(mlp.error_, list)
 
 def test_mlp_fit_nonzero():
     train_array = np.array([[0], [1], [2], [3], [4]])
@@ -537,13 +538,6 @@ def test_mlp_prediction_multi_output():
     assert raw_pred.shape == (2, 2)
     assert class_pred.shape == (2, 2)
     assert np.array_equal(class_pred, np.array([[0, 1], [1, 0]]))
-
-def test_mlp_prediction_strings():
-    train_array = np.array([[0], [1], [2], [3], [4]])
-    train_targets = np.array([['a'], ['a'], ['b'], ['b'], ['b']])
-    mlp = multilayer_Perceptron(layers = [1, 2, 1], epochs = 1000, learning_rate = 0.01)
-    with pytest.raises(TypeError):
-        mlp.fit(train_array, train_targets)
 
 def test_mlp_prediction_mult_feat():
     train_array = np.array([

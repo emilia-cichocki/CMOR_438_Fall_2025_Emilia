@@ -141,7 +141,7 @@ def _sigmoid(z):
     
     return 1.0/(1.0 + np.exp(-z))
 
-def derivative_sigmoid(z):
+def _derivative_sigmoid(z):
 
     """
     Sigmoid derivative function for multi-layer Perceptron
@@ -503,12 +503,12 @@ class multilayer_Perceptron():
         L = len(self.layers) - 1
         learning_rate = self.learning_rate
         delta = dict()
-        delta[L] = (a[-1] - train_targets) * derivative_sigmoid(z[-1])
+        delta[L] = (a[-1] - train_targets) * _derivative_sigmoid(z[-1])
         d_weights = []
         d_bias = []
 
         for i in range(L - 1, 0, -1):
-            delta[i] = (np.matmul(delta[i + 1], weights[i].T)) * derivative_sigmoid(z[i - 1])
+            delta[i] = (np.matmul(delta[i + 1], weights[i].T)) * _derivative_sigmoid(z[i - 1])
     
         for j in range(1, L + 1):
             d_weights_layer = learning_rate * np.matmul(a[j - 1].T, delta[j])
