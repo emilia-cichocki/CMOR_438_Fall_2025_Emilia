@@ -6,11 +6,13 @@ This folder showcases the use of the linear regression algorithm on a sample dat
 Linear regression is a supervised machine learning technique used for regression. It operates under the assumption that target values have a linear relationship with feature values, and attempting to find the best-fit line that describes this relationship. There are two main methods through which linear regression is implemented.
 
 ### Normal Equation
-Linear regression can be performed by directly calculating the parameters that optimize fit using the normal equation, which provides a closed-form solution. For a feature matrix $\mathbf{X}$ ($n_\text{samples}$, $n_\text{features}$) and a target vector $\mathbf{y}$ (n_samples), the normal equation for the coefficients $\theta$ is
+Linear regression can be performed by directly calculating the parameters that optimize fit using the normal equation, which provides a closed-form solution. For a feature matrix $\mathbf{X}$ with shape ($n_\text{samples}$, $n_\text{features}$) and a target vector $\mathbf{y}$ with shape ($n_\text{samples}$), the normal equation for the coefficients $\theta$ is
+
 $$
 \theta = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
 $$
-To account for a bias or intercept term, a column of ones is often added to the feature matrix, resulting in the dimensions ($n_\text{samples}$, $n_\text{features} + 1$). 
+
+To account for a bias or intercept term, a column of ones is often added to the feature matrix, resulting in the shape ($n_\text{samples}$, $n_\text{features} + 1$). 
 
 The normal equation provides a simple method for determining the optimal coefficients for linear regression, and does not require an iterative process using gradient descent (described below). However, the normal equation can fail if the feature matrix is not invertible, and it is computationally expensive for large feature sets.
 
@@ -19,32 +21,45 @@ Linear regression can also be performed using gradient descent, an optimization 
 
 **Foundation of Gradient Descent**  
 Gradient descent requires defining a cost function $C$, which quantifies the error between predicted and true target values. A variation on mean-squared error is often used as the cost function, with the formula
+
 $$
 C = \frac{1}{2n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2
 $$
+
 where $n$ is the number of samples, $\hat{y}_i$ is the predicted target value for a sample, and $y_i$ is the true target value. For a weight vector $\mathbf{w} = [w_1, ... w_k]$, a scalar bias term $b$, and a sample with an associated feature vector $\mathbf{x}_i = [x_{i1}, ..., x_{ik}]^\top$, the predicted value for the sample is given by
+
 $$
 \hat{y}_i = \mathbf{w}^\top \mathbf{x}_i + b
 $$
+
 Consequently, $C$ is implicitly a function of $\mathbf{w}$ and $b$, and can be written as 
+
 $$
 C(w, b) = \frac{1}{n} \sum_{i=1}^{n} (\mathbf{w}^\top \mathbf{x}_i + b - y_i)^2
 $$
+
 Gradient descent attempts to find the minimum of this function by repeatedly computing the gradient with respect to the weights and bias, which provides the direction of steepest increase, and moving incrementally in the opposite direction. The gradient of the cost function with respect to the weights is given by the partial derivative
+
 $$
 \frac{\partial C}{\partial \mathbf{w}} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i) \mathbf{x}_i
 $$
+
 and the gradient of the cost function with respect to the bias is given by the partial derivative
+
 $$
 \frac{\partial C}{\partial b} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)
 $$
+
 To minimize the cost function, the weights and bias must be adjusted in the direction of steepest decrease, which is the negative of the calculated derivatives. Thus, they are updated iteratively with the formula
+
 $$
 \mathbf{w} := \mathbf{w} - \alpha \frac{\partial C}{\partial \mathbf{w}}
 $$
+
 $$
 b := b - \alpha \frac{\partial C}{\partial b}
 $$
+
 where $\alpha$ is the learning rate for the model and determines the size of each update step. A large learning rate can make training more rapid but cause overshoots, while a small learning rate may not be sufficient to reach a minimum. 
 
 **Stochastic Gradient Descent**  
@@ -66,35 +81,44 @@ Linear regression is a common and standard algorithm for regression, but has sev
 - Assumes a linear relationship between features and the target variable
 - Assumes that features are independent of one another
 
-
 ## Evaluation
 Linear regression can be evaluated with standard regression metrics. The following metrics are used:
 
 1. *Mean Absolute Error (MAE)*: Measure of the mean absolute difference between predicted ($\hat{y}$) and true ($y_i$) values
+
 $$
 \mathrm{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
 $$
+
 2. *Mean Squared Error (MSE)*: Measure of the mean squared difference between predicted and true
+
 $$
 \mathrm{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
 $$
+
 3. *Root Mean Squared Error (RMSE)*: Square root of MSE
+
 $$
 \mathrm{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 $$
+
 4. *Coefficient of Determination (R2)*: Goodness-of-fit metric that measures explained variance
+
 $$
 R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 {\sum_{i=1}^{n} (y_i - \bar{y})^2}
 $$
+
 5. *Adjusted R2*: Calculation of R2 that accounts for feature number to penalize unnecessary additions
+
 $$
 R^2_{\text{adj}} =
 1 - \left(1 - R^2\right)
 \frac{n - 1}{n - p - 1}
 $$
+
 6. *Training Error*: MSE calculated on the training set for every epoch, recorded and plotted to track model learning
- 
+
 ## Code Features
 Linear regression is implemented using the custom `linear_regression` class from the supervised learning package. The following describes the class.
 
