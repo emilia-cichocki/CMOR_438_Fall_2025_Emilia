@@ -192,8 +192,8 @@ class Perceptron():
     ...                    [0, 0]])
     >>> model.prediction(X_test)
     array([1, 0])
-    >>> model.scoring(X, y)
-    1.0
+    >>> model.scoring(X, y) == 1.0
+    True
     """
 
     def __init__(self,
