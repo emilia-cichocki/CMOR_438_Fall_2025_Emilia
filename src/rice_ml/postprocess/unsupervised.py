@@ -153,7 +153,7 @@ def silhouette_score(data_array: np.ndarray, label_array: np.ndarray, ignore_noi
 
     return mean_score
 
-def evaluate_clusters(label_array: np.ndarray, print_eval: bool = True) -> Tuple[float, Union[float, str], collections.Counter]:
+def evaluate_clusters(label_array: np.ndarray, print_eval: bool = True) -> Tuple[int, Union[int, str], collections.Counter]:
 
     """
     Calculates and optionally prints the set of cluster evaluation metrics
@@ -210,6 +210,3 @@ def evaluate_clusters(label_array: np.ndarray, print_eval: bool = True) -> Tuple
             print(f"  Cluster {cluster_label}: {count} points")
     
     return n_clusters, n_noise, cluster_counts
-
-
-# TODO: unit tests

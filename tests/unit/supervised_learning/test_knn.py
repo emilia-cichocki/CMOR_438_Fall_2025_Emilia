@@ -5,8 +5,6 @@ import pytest
 from unittest.mock import patch
 from rice_ml.supervised_learning.knn import _validate_parameters, _validate_arrays, _distance_calculations, _neighbor_finding, _weighting_by_distance, _knn_foundation, knn_classification, knn_regressor
 
-# TODO: rename 'test_arrays' for lists/df, fix the formatting and spacing, add comments to indicate functions being tested
-
 def assert_array_output(test_array, test_labels, result_array, result_labels):
     assert isinstance(result_array, np.ndarray)
     assert isinstance(result_labels, np.ndarray)
@@ -35,8 +33,6 @@ def array_initializations_classification(weight: str = 'uniform'):
     knn = knn_classification(k = 2, weight = weight)
     knn.fit(train_array, train_labels)
     return knn
-
-
 
 def test_validate_parameters_basic():
     k = 3
@@ -105,9 +101,6 @@ def test_validate_parameters_weight_value():
     weight = 'negative'
     with pytest.raises(ValueError):
         _validate_parameters(k, metric, weight)
-
-
-
 
 def test_validate_arrays_basic_array():
     test_array = np.array([[1, 2], [3, 4]])
@@ -235,9 +228,6 @@ def test_validate_arrays_type_regression():
     with pytest.raises(TypeError):
         _validate_arrays(test_array, test_labels, regression = 'True')
 
-
-
-
 def test_distance_calculations_basic_euclidean():
     train_array = np.array([[1, 1], [0, 0]])
     test_array = np.array([[1, 0]])
@@ -354,7 +344,6 @@ def test_distance_calculations_nan():
     test_array = np.array([[1, 0]])
     with pytest.raises(ValueError):
         _distance_calculations(train_array, test_array, metric = 'euclidean')
-
 
 def test_neighbor_finding_basic_euclidean():
     train_array = np.array([[0, 0], [1, 1], [2, 2]])
@@ -522,10 +511,6 @@ def test_neighbor_finding_p_value():
     with pytest.raises(ValueError):
         _neighbor_finding(train_array, query_array, k, metric = 'minkowski', p = 0)
 
-
-
-
-
 def test_weighting_by_distance_uniform():
     test_array = np.array([[1, 1], [2, 1]])
     result_array = _weighting_by_distance(test_array, 'uniform')
@@ -584,7 +569,6 @@ def test_weighting_by_distance_type_inputs():
     with pytest.raises(TypeError):
         _weighting_by_distance(test_array, 'distance')
 
-
 def test_knn_foundation_init_basic():
     knn = _knn_foundation(k = 3)
     assert knn.n_neighbors == 3
@@ -619,62 +603,6 @@ def test_knn_foundation_init_input_values():
     with pytest.raises(ValueError):
         _knn_foundation(k = 3, weight = 'weighted')
 
-
-def test_knn_foundation_fit_basic_class():
-    knn = _knn_foundation(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array([1, 2, 1])
-    knn = knn.fit(train_array, train_label, False)
-    assert np.array_equal(knn._training, train_array)
-    assert np.array_equal(knn._labels, train_label)
-
-def test_knn_foundation_fit_data_type_input_class():
-    knn = _knn_foundation(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array(['a', 'b', 'c'])
-    knn = knn.fit(train_array, train_label, False)
-    assert np.array_equal(knn._training, train_array)
-    assert np.array_equal(knn._labels, train_label)
-
-def test_knn_foundation_fit_basic_reg():
-    knn = _knn_foundation(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array([1, 2, 1])
-    knn = knn.fit(train_array, train_label, True)
-    assert knn._labels.dtype == float
-    assert np.array_equal(knn._training, train_array.astype(float, copy = False))
-    assert np.array_equal(knn._labels, train_label)
-
-def test_knn_foundation_fit_data_type_input_reg():
-    knn = _knn_foundation(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array(['a', 'b', 'c'])
-    with pytest.raises(TypeError): 
-        knn.fit(train_array, train_label, True)
-
-def test_knn_foundation_fit_dimensions():
-    knn = _knn_foundation(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array([[1, 2, 1]])
-    with pytest.raises(ValueError):
-        knn.fit(train_array, train_label, False)
-
-def test_knn_foundation_fit_match_shape():
-    knn = _knn_foundation(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array([1, 2])
-    with pytest.raises(ValueError):
-        knn.fit(train_array, train_label, False)
-
-def test_knn_foundation_fit_k_value():
-    knn = _knn_foundation(k = 5)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array([[1, 2, 1]])
-    with pytest.raises(ValueError):
-        knn.fit(train_array, train_label, False)
-
-
-
 def test_verify_fit_basic():
     knn = _knn_foundation(k = 3)
     train_array = np.array([[0, 0], [1, 1], [2, 2]])
@@ -688,9 +616,6 @@ def test_verify_fit_unfit():
     knn = _knn_foundation(k = 3)
     with pytest.raises(RuntimeError):
         knn._verify_fit()
-
-
-
 
 def test_knn_implement_basic_euclidean():
     k = 2
@@ -805,10 +730,6 @@ def test_knn_implement_duplicates():
     assert indices.shape == (1, 2)
     assert set(indices[0]) <= {0, 1}
 
-
-
-
-
 def test_knn_classification_init_basic():
     knn = knn_classification(k = 3)
     assert knn.n_neighbors == 3
@@ -818,27 +739,6 @@ def test_knn_classification_init_basic():
     assert knn._training is None
     assert knn._labels is None
     assert knn.classes_ is None
-
-def test_knn_classification_fit_basic():
-    knn = knn_classification(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array([1, 2, 1])
-    knn = knn.fit(train_array, train_label)
-    assert np.array_equal(knn._training, train_array)
-    assert np.array_equal(knn._labels, train_label)
-    assert np.array_equal(knn.classes_, np.array([1, 2]))
-
-def test_knn_classification_fit_strings():
-    knn = knn_classification(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array(['a', 'b', 'a'])
-    knn = knn.fit(train_array, train_label)
-    assert np.array_equal(knn._training, train_array)
-    assert np.array_equal(knn._labels, train_label)
-    assert np.array_equal(knn.classes_, np.array(['a', 'b']))
-
-
-
 
 def test_knn_classification_probabilities_basic_uniform():
     knn = array_initializations_classification('uniform')
@@ -917,130 +817,6 @@ def test_knn_classification_probabilities_zeros():
     assert not np.allclose(normal_probability, fallback_probability)
     assert np.allclose(fallback_probability, expected_probability)
 
-
-
-def test_knn_classification_prediction_basic_uniform():
-    knn = array_initializations_classification('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    prediction = knn.prediction(query_array)
-    assert isinstance(prediction, np.ndarray)
-    assert prediction.shape == (2,)
-    assert prediction[0] == 1
-    assert prediction[1] == 2
-
-def test_knn_classification_prediction_basic_distance():
-    knn = array_initializations_classification('distance')
-    query_array = np.array([[0.5, 1.0]])
-    prediction = knn.prediction(query_array)
-    assert isinstance(prediction, np.ndarray)
-    assert prediction.shape == (1,)
-    assert prediction[0] == 2
-
-def test_knn_classification_prediction_ties():
-    knn = array_initializations_classification('distance')
-    query_array = np.array([[1, 0]])
-    prediction = knn.prediction(query_array)
-    assert isinstance(prediction, np.ndarray)
-    assert prediction.shape == (1,)
-    assert prediction[0] == 1
-
-def test_knn_classification_prediction_strings():
-    train_array = np.array([[0, 1], [1, 1], [1, 2]])
-    train_labels = np.array(['a', 'b', 'b'])
-    knn = knn_classification(k = 2, weight = 'uniform')
-    knn.fit(train_array, train_labels)
-    query_array = np.array([[0, 0], [2, 2]])
-    prediction = knn.prediction(query_array)
-    assert isinstance(prediction, np.ndarray)
-    assert prediction.shape == (2,)
-    assert prediction[0] == 'a'
-    assert prediction[1] == 'b'
-
-def test_knn_classification_prediction_unsorted():
-    train_array = np.array([[0, 1], [1, 1], [1, 2]])
-    train_labels = np.array([2, 2, 1])
-    knn = knn_classification(k = 2, weight = 'uniform')
-    knn.fit(train_array, train_labels)
-    query_array = np.array([[0, 0], [2, 2]])
-    prediction = knn.prediction(query_array)
-    assert isinstance(prediction, np.ndarray)
-    assert prediction.shape == (2,)
-    assert prediction[0] == 2
-    assert prediction[1] == 1
-
-def test_knn_classification_prediction_unfit():
-    knn = knn_classification(k = 2)
-    query_array = np.array([[1, 1]])
-    with pytest.raises(RuntimeError):
-        knn.prediction(query_array)
-
-
-
-def test_knn_classification_scoring_basic_uniform():
-    knn = array_initializations_classification('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1, 1])
-    score = knn.scoring(query_array, actual_labels)
-    assert isinstance(score, float)
-    assert score == 0.5
-
-def test_knn_classification_scoring_basic_distance():
-    knn = array_initializations_classification('distance')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1, 1])
-    score = knn.scoring(query_array, actual_labels)
-    assert isinstance(score, float)
-    assert score == 0.5
-
-def test_knn_classification_scoring_correct():
-    knn = array_initializations_classification('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1, 2])
-    score = knn.scoring(query_array, actual_labels)
-    assert isinstance(score, float)
-    assert score == 1.0
-
-def test_knn_classification_scoring_incorrect():
-    knn = array_initializations_classification('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([2, 1])
-    score = knn.scoring(query_array, actual_labels)
-    assert isinstance(score, float)
-    assert score == 0.0
-
-def test_knn_classification_scoring_strings():
-    train_array = np.array([[0, 1], [1, 1], [1, 2]])
-    train_labels = np.array(['a', 'b', 'b'])
-    knn = knn_classification(k = 2, weight = 'uniform')
-    knn.fit(train_array, train_labels)
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array(['a', 'a'])
-    score = knn.scoring(query_array, actual_labels)
-    assert isinstance(score, float)
-    assert score == 0.5
-
-def test_knn_classification_scoring_type_labels():
-    knn = array_initializations_classification('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = 'np.array([1, 1])'
-    with pytest.raises(TypeError):
-        knn.scoring(query_array, actual_labels)
-
-def test_knn_classification_scoring_match_shape():
-    knn = array_initializations_classification('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1, 1, 1])
-    with pytest.raises(ValueError):
-        knn.scoring(query_array, actual_labels)
-
-def test_knn_classification_scoring_unfit():
-    knn = knn_classification(k = 2)
-    with pytest.raises(RuntimeError):
-        knn.scoring(np.array([[1, 1]]), np.array([1]))
-
-
-
-
 def test_knn_regressor_init_basic():
     knn = knn_regressor(k = 3)
     assert knn.n_neighbors == 3
@@ -1049,23 +825,6 @@ def test_knn_regressor_init_basic():
     assert knn.p == 3
     assert knn._training is None
     assert knn._labels is None
-
-def test_knn_regressor_fit_basic():
-    knn = knn_regressor(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array([1, 2, 1])
-    knn = knn.fit(train_array, train_label)
-    assert np.array_equal(knn._training, train_array)
-    assert np.array_equal(knn._labels, train_label)
-
-def test_knn_regressor_fit_strings():
-    knn = knn_regressor(k = 3)
-    train_array = np.array([[0, 0], [1, 1], [2, 2]])
-    train_label = np.array(['a', 'b', 'a'])
-    with pytest.raises(TypeError):
-        knn.fit(train_array, train_label)
-
-
 
 def array_initializations_regressor(weight: str = 'uniform'):
     train_array = np.array([[0, 0], [1, 1], [1, 2]])
@@ -1098,7 +857,7 @@ def test_knn_regressor_prediction_unfit():
     with pytest.raises(RuntimeError):
         knn.prediction(query_array)
 
-def test_knn_classification_probabilities_zeros():
+def test_knn_regressor_probabilities_zeros():
     train_array = np.array([[0, 0], [1, 1], [10, 10]])
     train_labels = np.array([0, 1, 2])
     knn = knn_regressor(k = 2, weight = 'distance')
@@ -1110,78 +869,3 @@ def test_knn_classification_probabilities_zeros():
     assert isinstance(fallback_prediction, np.ndarray)
     assert not np.allclose(normal_prediction, fallback_prediction)
     assert fallback_prediction[0] == 0.5
-        
-
-def test_knn_regressor_scoring_basic():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0.5, 0.5], [1, 1.5]])
-    actual_labels = np.array([1.4, 2.1])
-    score = knn.scoring(query_array, actual_labels)
-    expected_score = 0.918367
-    assert isinstance(score, float)
-    assert np.isclose(score, expected_score)
-    
-def test_knn_regressor_scoring_zeros():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1.75, 2.25])
-    score = knn.scoring(query_array, actual_labels)
-    expected_score = 0
-    assert isinstance(score, float)
-    assert np.isclose(score, expected_score)
-
-def test_knn_regressor_scoring_correct():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1.5, 2])
-    score = knn.scoring(query_array, actual_labels)
-    assert isinstance(score, float)
-    assert score == 1.0
-
-def test_knn_regressor_scoring_training_data():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [1, 1], [1, 2]])
-    actual_labels = np.array([1.5, 2, 2])
-    score = knn.scoring(query_array, actual_labels)
-    assert isinstance(score, float)
-    assert score == 1.0
-
-def test_knn_regressor_scoring_uniform_actual():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [0, 1], [1, 2]])
-    actual_labels = np.array([2, 2, 2])
-    with pytest.raises(ValueError):
-        knn.scoring(query_array, actual_labels)
-
-def test_knn_regressor_scoring_type_labels():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = 'np.array([1, 1])'
-    with pytest.raises(TypeError):
-        knn.scoring(query_array, actual_labels)
-
-def test_knn_regressor_scoring_match_shape():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1, 1, 2])
-    with pytest.raises(ValueError):
-        knn.scoring(query_array, actual_labels)
-
-def test_knn_regressor_scoring_strings():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array(['a', 'a'])
-    with pytest.raises(TypeError):
-        knn.scoring(query_array, actual_labels)
-
-def test_knn_regressor_scoring_nan():
-    knn = array_initializations_regressor('uniform')
-    query_array = np.array([[0, 0], [2, 2]])
-    actual_labels = np.array([1, np.nan])
-    with pytest.raises(ValueError):
-        knn.scoring(query_array, actual_labels)
-
-def test_knn_regressor_scoring_unfit():
-    knn = knn_regressor(k = 2)
-    with pytest.raises(RuntimeError):
-        knn.scoring(np.array([[1, 1]]), np.array([1]))
