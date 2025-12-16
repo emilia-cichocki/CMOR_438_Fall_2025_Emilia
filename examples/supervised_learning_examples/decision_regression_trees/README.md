@@ -1,6 +1,6 @@
 # Decision & Regression Trees
 
-This folder showcases the use of decision (classification) and regression tree algorithms on a sample dataset.This README contains a description of the base decision tree algorithm, its advantages and disadvantages, and the common evaluation metrics, as well as the dataset used and details of the code for the custom classes.
+This folder showcases the use of decision (classification) and regression tree algorithms on a sample dataset. This README contains a description of the base decision tree algorithm, its advantages and disadvantages, and the common evaluation metrics, as well as the dataset used and details of the code for the custom classes.
 
 ## Decision/Regression Tree Algorithm
 Decision and regression trees are a form of supervised learning that can be used, respectively, for classification and regression tasks. They operate recursively to discover optimal feature threshold values that produce splits in the data, resulting in a flowchart or tree-like structure that is able to predict label or target variables from numerical features.
