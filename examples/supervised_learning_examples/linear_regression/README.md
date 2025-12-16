@@ -20,13 +20,19 @@ The normal equation provides a simple method for determining the optimal coeffic
 Linear regression can also be performed using gradient descent, an optimization method that iteratively updates feature weights and biases until a minimum error is reached.
 
 **Foundation of Gradient Descent**  
-Gradient descent requires defining a cost function $C$, which quantifies the error between predicted and true target values. A variation on mean-squared error is often used as the cost function, with the formula
+Gradient descent requires defining a cost function $C$, which quantifies the error between predicted and true target values. The following formula (a variation on mean-squared error) is often used as the cost function, where $n$ is the number of samples, $y_i$ is the true target value, and the predicted target value for a sample is $\hat{y}_i\$
 
 $$
 C = \frac{1}{2n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2
 $$
 
-where $n$ is the number of samples, $\hat{y}_i$ is the predicted target value for a sample, and $y_i$ is the true target value. For a weight vector $\mathbf{w} = [w_1, ... w_k]$, a scalar bias term $b$, and a sample with an associated feature vector $\mathbf{x}_i = [x_{i1}, ..., x_{ik}]^\top$, the predicted value for the sample is given by
+For a weight vector $\mathbf{w} = [w_1, ... w_k]$, a scalar bias term $b$, and a sample with an associated feature vector 
+
+$$
+\mathbf{x}_i = [x_{i1}, ..., x_{ik}]^\top
+$$
+
+the predicted value for the sample is given by
 
 $$
 \hat{y}_i = \mathbf{w}^\top \mathbf{x}_i + b
