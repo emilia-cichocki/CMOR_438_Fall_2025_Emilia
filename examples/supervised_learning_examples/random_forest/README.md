@@ -34,40 +34,55 @@ Random forests can be evaluated with either standard classification or regressio
 For classification, the following metrics are used:
 1. *Accuracy*: Proportion of predictions that match true labels
 2. *Precision*: Measure of how many positive predictions for a class are true positives (TP) compared to false positives (FP)
+
 $$
 P = \frac{TP}{TP + FP}
 $$
+
 3. *Recall*: Measure of how many positive instances for a class are predicted (TP) compared to false negatives (FN)
+
 $$
 R = \frac{TP}{TP + FN}
 $$
+
 4. *F1 Score*: Combination of precision and recall
+
 $$
 F_1 = 2 \cdot \frac{\text{P} \cdot \text{R}}{\text{P} + \text{R}}
 $$
+
 5. *Confusion Matrix*: Visualization of true versus predicted labels for each class
 
 Precision, recall, and F1 can be calculated as a micro or macro average. The micro-average of precision or recall is calculated by summing the total number of true positives, false positives, and false negatives for a single calculation. The macro-average is calculated by averaging the value of the metric for each class present in the data. The micro F1 score is calculated using the micro precision and recall scores, while the macro F1 score is the average of the F1 score for each class. Thus, micro scores are heavily biased from the majority class, while macro scores provide information on the overall model ability with equal class weightings.
 
 For regression, the following metrics are used:
 1. Mean Absolute Error (MAE): Measure of the mean absolute difference between predicted ($\hat{y}$) and true ($y_i$) values
+
 $$
 \mathrm{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
 $$
+
 2. Mean Squared Error (MSE): Measure of the mean squared difference between predicted and true
+
 $$
 \mathrm{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
 $$
+
 3. Root Mean Squared Error (RMSE): Square root of MSE
+
 $$
 \mathrm{RMSE} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 $$
+
 4. Coefficient of Determination (R2): Goodness-of-fit metric that measures explained variance
+
 $$
 R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 {\sum_{i=1}^{n} (y_i - \bar{y})^2}
 $$
+
 5. Adjusted R2: Calculation of R2 that accounts for feature number to penalize unnecessary additions
+
 $$
 R^2_{\text{adj}} =
 1 - \left(1 - R^2\right)
