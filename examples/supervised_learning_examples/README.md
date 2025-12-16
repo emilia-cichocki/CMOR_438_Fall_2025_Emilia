@@ -5,13 +5,13 @@ Supervised learning refers to a form of machine learning that uses a set of data
 
 ### Contents
 This folder contains example implementations for each of the custom-built supervised learning algorithms. It includes ten algorithms distributed across the following seven subfolders:
-1. Decision & regression trees **(contains separate examples for both decision and regression trees)**
-2. KNN **(contains separate examples for both classification and regression using KNN)**
-3. Linear Regression
-4. Logistic Regression
-5. Multi-layer Perceptron
-6. Perceptron
-7. Random Forest **(contains separate examples for both classification and regression using random forests)**
+1. *Decision & regression trees* **(contains separate examples for both decision and regression trees)**
+2. *KNN* **(contains separate examples for both classification and regression using KNN)**
+3. *Linear Regression*
+4. *Logistic Regression*
+5. *Multi-layer Perceptron*
+6. *Perceptron*
+7. *Random Forest* **(contains separate examples for both classification and regression using random forests)**
 
 ### Subfolder Contents 
 Every folder for a machine learning algorithm contains a notebook that demonstrates the application of the relevant algorithm (i.e., classification or regression) on a sample dataset. The structure of notebooks is shared among all examples, and includes:
