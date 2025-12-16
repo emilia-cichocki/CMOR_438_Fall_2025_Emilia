@@ -6,8 +6,6 @@ from unittest.mock import patch
 from rice_ml.preprocess.standardize import z_score_standardize
 from rice_ml.unsupervised_learning.pca import *
 
-
-
 def test_pca_init_basic():
     pca = PCA(3)
     assert pca.n_components == 3
