@@ -20,7 +20,7 @@ The contents of the repository are listed below. More information on each sectio
     - To verify functionality, unit and integration tests are included for each algorithm in `tests`
 
 ## Dependencies & Requirements
-The code in this repository has been built and tested using Python 3.9.6. The following Python packages are required (specific versions known to work with the code are listed in each of the associated notebooks)
+The code in this repository has been built and tested using Python 3.9.6. The following Python packages are required (specific versions known to work with the code are listed in each of the associated notebooks):
 - NumPy
 - Pandas
 - Matplotlib
