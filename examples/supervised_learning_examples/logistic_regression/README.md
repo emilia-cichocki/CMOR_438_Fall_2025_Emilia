@@ -3,7 +3,7 @@
 This folder showcases the use of the logistic regression algorithm on a sample dataset for classification tasks. This README contains a description of the logistic regression algorithm, its advantages and disadvantages, and the common evaluation metrics, as well as the dataset used and details of the code for the custom logistic regression class.
 
 ## Logistic Regression Algorithm
-Logistic regression is a supervised machine learning technique used for binary classification. It operates by using gradient descent to update feature weights and biases, and incorporating the sigmoid function to predict the probability that a sample belongs to a particular class.
+Logistic regression is a supervised machine learning technique used for binary classification. It operates by using gradient descent to update feature weights and bias, and incorporating the sigmoid function to predict the probability that a sample belongs to a particular class.
 
 ### Foundation of Gradient Descent 
 The version of gradient descent used in logistic regression requires defining a cost function $C$, which quantifies the error between predicted and true classes. Binary cross-entropy loss is often used as the cost function, where $n$ is the number of samples, $y_i$ is the true class label, and the predicted probability that a sample belongs in the positive class is $\hat{y}_i$
@@ -12,7 +12,7 @@ $$
 C = - \frac{1}{n} \sum_{i=1}^{n} \Big[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \Big]
 $$
 
-For a weight vector $\mathbf{w} = [w_1, ... w_k]$, a scalar bias term $b$, and a sample with an associated feature vector 
+For a weight vector $\mathbf{w} = [w_1, ..., w_k]$, a scalar bias term $b$, and a sample with an associated feature vector 
 
 $$
 \mathbf{x}_i = [x_{i1}, ..., x_{ik}]^\top
@@ -55,7 +55,7 @@ $$
 where $\alpha$ is the learning rate for the model and determines the size of each update step. A large learning rate can make training more rapid but cause overshoots, while a small learning rate may not be sufficient to reach a minimum. 
 
 ### Stochastic Gradient Descent
-This implementation of logistic regression uses stochastic gradient descent. Rather than calculating the gradient for every sample and then performing the update step (batch gradient descent), stochastic gradient descent updates the weights and biases after a single sample, making it an efficient form of gradient descent.
+This implementation of logistic regression uses stochastic gradient descent. Rather than calculating the gradient for every sample and then performing the update step (batch gradient descent), stochastic gradient descent updates the weights and bias after a single sample, making it an efficient form of gradient descent.
 
 Logistic regression begins by randomly initializing a vector of weights with length $k$ (number of features) and a bias term. The weights and bias are then updated using the gradient descent algorithm; for each epoch, the model performs stochastic gradient descent for all samples in a random order. This process continues until the maximum number of epochs is reached.
 
@@ -72,7 +72,7 @@ $$
 \hat{y}_i = \sigma(\mathbf{w}^\top \mathbf{x}_i + b)
 $$
 
-where $\mathbf{w}$ and $b$ are the learned weights and biases, respectively. This outputs a probability ranging from 0 to 1; a sample is classified as belonging to the positive class if the output is greater than a threshold (typically 0.5, but can be adjusted based on the needs of the problem).
+where $\mathbf{w}$ and $b$ are the learned weights and bias, respectively. This outputs a probability ranging from 0 to 1; a sample is classified as belonging to the positive class if the output is greater than a threshold (typically 0.5, but can be adjusted based on the needs of the problem).
 
 ## Advantages and Disadvantages
 Logistic regression is a standard algorithm for binary classification, but has several limitations that restrict its applicability.
@@ -112,7 +112,7 @@ $$
 
 5. *Confusion Matrix*: Visualization of true versus predicted labels for each class
 
-Precision, recall, and F1 can be calculated as a micro or macro average. The micro-average of precision or recall is calculated by summing the total number of true positives, false positives, and false negatives for a single calculation. The macro-average is calculated by averaging the value of the metric for each class present in the data. The micro F1 score is calculated using the micro precision and recall scores, while the macro F1 score is the average of the F1 score for each class. Thus, micro scores are heavily biased from the majority class, while macro scores provide information on the overall model ability with equal class weightings.
+Precision, recall, and F1 can be calculated as a micro or macro average. The micro-average of precision or recall is calculated by summing the total number of true positives, false positives, and false negatives for a single calculation. The macro-average is calculated by averaging the value of the metric for each class present in the data. The micro F1 score is calculated using the micro precision and recall scores, while the macro F1 score is the average of the F1 score for each class. Thus, micro scores are heavily biased toward the majority class, while macro scores provide information on the overall model ability with equal class weightings.
 
 6. *Area Under (Receiver Operating Characteristic) Curve (AUC)*: Measure of how well the model can distinguish between binary classes, computed using the Wilcoxon rank-sum formula for the sum of positive ranks (where $\sum_{i \in \text{Pos}} R_i$ is the sum of the positive ranks, $n_\text{p}$ is the number of positive samples, and $n_\text{n}$ is the number of negative samples)
 

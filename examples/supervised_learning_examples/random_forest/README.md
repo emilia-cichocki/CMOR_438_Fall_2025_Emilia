@@ -62,7 +62,7 @@ $$
 \mathrm{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
 $$
 
-2. Mean Squared Error (MSE): Measure of the mean squared difference between predicted and true
+2. Mean Squared Error (MSE): Measure of the mean squared difference between predicted and true values
 
 $$
 \mathrm{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
@@ -81,7 +81,7 @@ R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 {\sum_{i=1}^{n} (y_i - \bar{y})^2}
 $$
 
-5. Adjusted R2: Calculation of R2 that accounts for feature number to penalize unnecessary additions
+5. Adjusted R2: Calculation of R2 that accounts for number of features to penalize unnecessary additions
 
 $$
 R^2_{\text{adj}} =
@@ -115,4 +115,4 @@ The dataset used for evaluating random forests is the Palmer Penguins data, whic
 - *Body Mass (g)*: continuous values, measuring body mass in grams
 - *Sex*: categorical data, one of 'Male' or 'Female'  
 
-The random forest classifier attempts to classify sex using sets of the continuous numeric features, while the regression tree attempts to predict the bill length of a sample given additional feature data. More information on the particular features selected can be found in each of the associated notebooks.
+The random forest classifier attempts to classify sex using sets of the continuous features, while the regression tree attempts to predict the bill length of a sample given additional feature data. More information on the particular features selected can be found in each of the associated notebooks.

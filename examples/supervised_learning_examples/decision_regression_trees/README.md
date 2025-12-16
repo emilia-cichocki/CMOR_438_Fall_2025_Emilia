@@ -99,7 +99,7 @@ $$
 \mathrm{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
 $$
 
-2. *Mean Squared Error (MSE)*: Measure of the mean squared difference between predicted and true
+2. *Mean Squared Error (MSE)*: Measure of the mean squared difference between predicted and true values
 
 $$
 \mathrm{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2

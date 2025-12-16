@@ -3,7 +3,7 @@
 This folder showcases the use of principal component analysis (PCA) on a sample dataset for dimensionality reduction. This README contains a description of the PCA algorithm, its advantages and disadvantages, and the common evaluation metrics, as well as the dataset used and details of the code for the custom PCA class.
 
 ## PCA Algorithm
-PCA is an unsupervised machine learning technique that attempts to find combinations of features, denoted as principal components, that explain maximum variance in the data. It operates on the principle that dimensionality can be reduced with minimal information loss by rotating the data to find an orthogonal basis that capture variance.
+PCA is an unsupervised machine learning technique that attempts to find combinations of features, denoted as principal components, that explain maximum variance in the data. It operates on the principle that dimensionality can be reduced with minimal information loss by rotating the data to find an orthogonal basis that captures variance.
 
 ### Principal Component Construction
 PCA is performed by calculating the covariance matrix for input data features. For two variables $x$ and $y$ with $n$ samples each, sample covariance is defined as

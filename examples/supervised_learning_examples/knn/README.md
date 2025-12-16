@@ -5,7 +5,7 @@ This folder showcases the use of the k-nearest neighbors (KNN) algorithm on a sa
 ## KNN Algorithm
 K-nearest neighbors (KNN) is a supervised machine learning algorithm that can be flexibly used for either classification or regression. It operates on the guiding principle that points similar to one another will be close in space, thus allowing for determination of the properties of a previously unseen point by examining its neighbors. 
 
-KNN takes a set of labeled training data with $n$ numerical feature values, which are used to position each sample as a point in $n$-dimensional space. For a given unlabeled test sample with values for each of the $n$ associated features, the distance from this point to each point in the training sample is calculated with a specified distance metric. Points are then ranked based on their distance to the test sample (near to far), and the $k$-nearest points (neighbors) to the sample are selected. The label or target value of these neighbors are then used to determine the predicted label or target of the sample. In KNN classification, where each training point is labeled with a specific category (typically encoded as a discrete integer value corresponding to a class), the majority label out of the neighbors is assigned to the test sample. In KNN regression, where each training point has a target that is a continuous numerical value, the mean of the neighbor targets is assigned to the test sample.
+KNN takes a set of labeled training data with $n$ numerical feature values, which are used to position each sample as a point in $n$-dimensional space. For a given unlabeled test sample with values for each of the $n$ associated features, the distance from this point to each point in the training sample is calculated with a specified distance metric. Points are then ranked based on their distance to the test sample (near to far), and the $k$-nearest points (neighbors) to the sample are selected. The label or target value of these neighbors is then used to determine the predicted label or target of the sample. In KNN classification, where each training point is labeled with a specific category (typically encoded as a discrete integer value corresponding to a class), the majority label out of the neighbors is assigned to the test sample. In KNN regression, where each training point has a target that is a continuous numerical value, the mean of the neighbor targets is assigned to the test sample.
 
 ### Distance Variations
 Distances in KNN can be calculated using one of several metrics. Given two points $x = (x_1, ..., x_n)$ and $y = (y_1, ..., y_n)$ in $n$-dimensional space, the following metrics are common.
@@ -108,7 +108,7 @@ $$
 \mathrm{MAE} = \frac{1}{n} \sum_{i=1}^{n} \lvert y_i - \hat{y}_i \rvert
 $$
 
-2. *Mean Squared Error (MSE)*: Measure of the mean squared difference between predicted and true
+2. *Mean Squared Error (MSE)*: Measure of the mean squared difference between predicted and true values
 
 $$
 \mathrm{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
@@ -127,7 +127,7 @@ R^2 = 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}
 {\sum_{i=1}^{n} (y_i - \bar{y})^2}
 $$
 
-5. *Adjusted R2*: Calculation of R2 that accounts for feature number to penalize unnecessary additions
+5. *Adjusted R2*: Calculation of R2 that accounts for number of features to penalize unnecessary additions
 
 $$
 R^2_{\text{adj}} =

@@ -4,7 +4,7 @@ This package stores various unsupervised learning algorithms, including principa
 
 ### Modules
 - *Clustering* (`clustering`)
-    - Classes implement various clustering algorithms
+    - Classes implementing various clustering algorithms
     - Support for model fitting on unlabeled data
     - **Note: the algorithms for both k-means and DBSCAN are stored in this module**
 - *Community Detection: Label Propagation* (`communitydetection`)

@@ -55,7 +55,7 @@ $$
 a(i) = \frac{1}{|C_i| - 1} \sum_{\substack{j \in C_i \\ j \neq i}} \| \mathbf{x}_i - \mathbf{x}_j \|
 $$
 
-4. *Inertia (Within-Cluster Sum of Squared Distances)*: Measurement of how how well the data is clustered; the sum of the distances between all points in a cluster to the cluster centroid summed again across all clusters, given by the formula (where $C_i$ denotes clusters in the data and $c_i$ the associated centroid)
+4. *Inertia (Within-Cluster Sum of Squared Distances)*: Measurement of how well the data is clustered; the sum of the distances between all points in a cluster to the cluster centroid summed again across all clusters, given by the formula (where $C_i$ denotes clusters in the data and $c_i$ the associated centroid)
 
 $$
 I = \sum_{i=1}^{k} \sum_{x \in C_i} \| x - c_i \|^2

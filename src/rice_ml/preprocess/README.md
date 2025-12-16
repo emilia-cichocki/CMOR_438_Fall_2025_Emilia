@@ -14,4 +14,4 @@ This package can be used to preprocess raw data to a form that is usable in an i
     - Support for finding training, testing, and validation datasets
 - *Standardize* (`standardize`)
     - Functions for standardizing data
-    - Support for a range of standardization metrics (e.g, z-score, min-max)
+    - Support for a range of standardization metrics (e.g., z-score, min-max)
