@@ -3,7 +3,6 @@ import numpy as np
 import pytest
 from rice_ml.supervised_learning.randomforest import random_forest
 
-
 def test_fit_classification_basic():
     test_array = np.array([[1, 2], [2, 1], [3, 4], [4, 3]])
     test_targets = np.array([0, 0, 1, 1])
