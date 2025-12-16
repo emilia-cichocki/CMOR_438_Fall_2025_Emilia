@@ -1,10 +1,3 @@
----
-name: Feature Request
-about: Propose a new feature, algorithm, or documentation
-title: "[Feature] "
-labels: enhancement
-assignees: <your-profile-name>
----
 
 ### Feature Summary
 
