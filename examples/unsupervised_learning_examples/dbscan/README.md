@@ -24,7 +24,7 @@ DBSCAN is a common and versatile clustering algorithm, but has several notable d
 - Handles outliers and noisy points automatically
 
 ### Disadvantages
-- Resuls can vary significantly based on the choice of $\epsilon$ and the minimum number of neighbors required to identify a core point
+- Results can vary significantly based on the choice of $\epsilon$ and the minimum number of neighbors required to identify a core point
 - Poor performance in higher dimensions and as distance between points increases 
 
 ## Evaluation

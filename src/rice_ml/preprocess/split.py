@@ -113,7 +113,7 @@ def _stratified_indices(data: np.ndarray,
     """
     Generates stratified indices for data given a specified test size
 
-    Splits indices to maintaing proportions across the results, which
+    Splits indices to maintaining proportions across the results, which
     can then be used for train/test data splits that require the preservation
     of relative proportions for each class
 

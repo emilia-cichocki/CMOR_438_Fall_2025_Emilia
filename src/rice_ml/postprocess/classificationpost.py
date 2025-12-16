@@ -717,7 +717,7 @@ def log_loss(predicted_scores: np.ndarray, true_classes: np.ndarray, epsilon: fl
     TypeError
         If `epsilon` is not a float or integer
     ValueError
-        If `epsilon` is not a finite positive value, probabilites do not
+        If `epsilon` is not a finite positive value, probabilities do not
         total 1 across rows, or true class labels cannot be mapped to columns
 
     Examples

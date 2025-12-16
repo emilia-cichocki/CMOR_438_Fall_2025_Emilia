@@ -532,7 +532,7 @@ class knn_classification(_knn_foundation):
         Returns
         -------
         probability_matrix: np.ndarray
-            2D array of size (n_queries, n_classes) containing probabilites that
+            2D array of size (n_queries, n_classes) containing probabilities that
             a sample belongs to a class
 
         Raises
