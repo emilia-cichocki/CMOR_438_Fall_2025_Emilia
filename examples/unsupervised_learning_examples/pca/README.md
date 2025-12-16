@@ -7,18 +7,22 @@ PCA is an unsupervised machine learning technique that attempts to find combinat
 
 ### Principal Component Construction
 PCA is performed by calculating the covariance matrix for input data features. For two variables $x$ and $y$ with $n$ samples each, sample covariance is defined as
+
 $$
 \text{Cov}(x, y) = \frac{1}{n - 1} \sum_{i=1}^{n} (x_i - \bar{x})(y_i - \bar{y})
 $$
+
 where $\bar{x}$ and $\bar{y}$ are the means of $x$ and $y$, respectively. For $p$ variables, the covariance matrix is defined as the matrix $C_{p \text{x} p}$, where each entry $C_{ij}$ denotes the sample covariance between the $i$-th and $j$-th feature.
 
 The covariance matrix can be treated as a linear transformation that maps data onto eigenvectors. Thus, the eigenvectors of the matrix correspond to the directions of maximal variance in the data (principal components) and the eigenvalues represent the extent of variance captured along each direction.
 
 ### Data Transformation
 Once the principal components are found by calculating the eigenvalues, the input data can be transformed to the newly described space, with a dimension equal to the number of principal components. For a data array $D$ with dimensions $n_\text{samples}$ by $n_\text{features}$ and a component array $P$ with dimensions $n_\text{features}$ by $n_\text{components}$, the transformed data matrix $T$ is given by
+
 $$
 T = DP
 $$
+
 where every row of $T$ represents the values for a sample on each principal component in the transformed space.
 
 ## Advantages and Disadvantages
