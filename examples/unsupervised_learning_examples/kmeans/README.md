@@ -6,6 +6,7 @@ This folder showcases the use of the k-means clustering algorithm on a sample da
 K-means clustering is an unsupervised machine learning technique used for clustering analysis. It operates on the principle that a set of points in space can be partitioned in a manner that minimizes within-cluster variance, producing well-separated clusters.
 
 K-means takes a set of unlabeled data with $n$ numerical feature values and positions each as a point in an $n$-dimensional space. For a specified number of clusters $k$, the k-means algorithm begins by randomly selecting $k$ points from the set to act as centroids. The distance between every point in the set and each centroid is calculated using Euclidean distance, a standard distance metric that finds the straight-line distance between two points in Euclidean space. The formula for Euclidean distance is  
+
 $$
     d(x, y) = \sqrt{{\sum_{i=1}^{n} (x_i - y_i)^2}}
 $$
@@ -31,25 +32,35 @@ K-means can be evaluated with several clustering metrics. The following metrics 
 1. *Number of Clusters*: Number of clusters identified
 2. *Cluster Counts*: Number of points per cluster
 3. *Silhouette Score*: Measure of how similar a point is to its assigned cluster in comparison to other clusters
+
 $$
 S = \frac{1}{n} \sum_{i=1}^{n} s(i)
 $$
+
 where the silhouette score for each point $s(i)$ is given by
+
 $$
 s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
 $$
+
 $b(i)$ is the minimum distance from a point in cluster $C_i$ to any other cluster $C$, given by
+
 $$
 b(i) = \min_{C \neq C_i} \frac{1}{|C|} \sum_{j \in C} \| \mathbf{x}_i - \mathbf{x}_j \|
 $$
+
 $a(i)$ is the mean distance from a point to all other points in the same cluster, given by
+
 $$
 a(i) = \frac{1}{|C_i| - 1} \sum_{\substack{j \in C_i \\ j \neq i}} \| \mathbf{x}_i - \mathbf{x}_j \|
 $$
+
 4. *Inertia (Within-Cluster Sum of Squared Distances)*: Measurement of how how well the data is clustered; the sum of the distances between all points in a cluster to the cluster centroid summed again across all clusters, given by the formula (where $C_i$ denotes clusters in the data and $c_i$ the associated centroid)
+
 $$
 I = \sum_{i=1}^{k} \sum_{x \in C_i} \| x - c_i \|^2
 $$
+
 5. *Elbow Plot*: Visualization of the inertia for different numbers of clusters, used to identify the optimal $k$
 
 ## Code Features
