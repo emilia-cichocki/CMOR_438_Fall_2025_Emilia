@@ -70,7 +70,7 @@ $$
 After the error signal is calculated, the weights and biases are updated through backpropagation. This involves calculating the error signal for each layer; for $l = L, ..., 1$, the error signal $\delta _i^l$ is 
 
 $$
-\delta _i^l = \delta _i^{l+1}(\mathbf{W}^l)^\top \;\odot\; \sigma'(\mathbf{z}_i^{l})
+\delta _i^l = \delta _i^{l+1}(\mathbf{W}^l)^\top \odot \sigma'(\mathbf{z}_i^{l})
 $$
 
 For $l = L, ..., 0$, weights and biases are updated using the formulas
