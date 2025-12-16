@@ -4,8 +4,6 @@ import pandas as pd
 import pytest
 from rice_ml.supervised_learning.distances import _ensure_numeric, euclidean_distance, manhattan_distance, minkowski_distance
 
-# TODO: rename 'test_arrays' for lists/df, fix the formatting and spacing, add comments to indicate functions being tested
-
 def test_ensure_numeric_basic_array():
     test_array = np.array([1, 2, 3, 4])
     result_array = _ensure_numeric(test_array)

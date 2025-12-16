@@ -31,7 +31,7 @@ import numpy as np
 from typing import *
 import matplotlib.pyplot as plt
 from rice_ml.preprocess.datatype import *
-from scipy import stats # TODO: finish this!
+from scipy import stats
 from rice_ml.supervised_learning.distances import _ensure_numeric
 import seaborn as sns
 

@@ -6,8 +6,6 @@ from scipy import stats
 import pytest
 from rice_ml.preprocess.cleaning import *
 
-# TODO: fix the formatting and spacing, add comments to indicate functions being tested
-
 def test_missing_data_basic_drop():
     test_array = np.array([[1, 2, 3], [2, 4, np.nan], [3, np.nan, 9]])
     result_array = missing_data(test_array, 'drop')

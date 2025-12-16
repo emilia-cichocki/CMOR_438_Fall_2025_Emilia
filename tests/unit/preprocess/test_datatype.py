@@ -4,8 +4,6 @@ import pandas as pd
 import pytest
 from rice_ml.preprocess.datatype import *
 
-# TODO: fix the formatting and spacing, add comments to indicate functions being tested
-
 def test_2D_numeric_basic_array():
     test_array = np.array([[1, 2, 3], [2, 4, 6]])
     result_array = _2D_numeric(test_array, 'test_array')

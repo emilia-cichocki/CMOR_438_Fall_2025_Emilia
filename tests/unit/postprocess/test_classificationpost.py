@@ -7,8 +7,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import warnings
 
-# TODO: formatting
-
 def test_validate_vector_match_basic():
     test_pred_array = np.array([0, 1, 1, 0])
     test_true_array = np.array([1, 0, 0, 1])

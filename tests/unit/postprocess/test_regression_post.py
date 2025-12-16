@@ -3,8 +3,6 @@ import numpy as np
 import pytest
 from rice_ml.postprocess.regressionpost import _validate_vector_match, mae, mse, rmse, r2, adjusted_r2
 
-# TODO: formatting
-
 def test_validate_vector_match_basic():
     test_pred_array = np.array([0, 1, 1, 0])
     test_true_array = np.array([1, 0, 0, 1])
