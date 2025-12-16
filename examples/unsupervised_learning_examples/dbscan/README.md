@@ -6,6 +6,7 @@ This folder showcases the use of the DBSCAN algorithm on a sample dataset for cl
 DBSCAN is an unsupervised machine learning technique used for clustering analysis. It operates on the guiding principle that clustering can be performed by determining dense groups of points that are separated by less dense areas. Consequently, it finds groups of points that are closely packed together, and marks points in regions with lower density as noise.
 
 DBSCAN takes a set of unlabeled data with $n$ numerical feature values and positions each as a point in an $n$-dimensional space. For each point, the points that are within some distance $\epsilon$ are defined as neighbors and counted. Distance is calculated using Euclidean distance, a standard distance metric that finds the straight-line distance between two points in Euclidean space. The formula for Euclidean distance is  
+
 $$
     d(x, y) = \sqrt{{\sum_{i=1}^{n} (x_i - y_i)^2}}
 $$
@@ -33,21 +34,29 @@ DBSCAN can be evaluated with several clustering metrics. The following metrics a
 2. *Number of Noise Points*: Number of points classified as noise and not included in a cluster
 3. *Cluster Counts*: Number of points per cluster
 4. *Silhouette Score*: Measure of how similar a point is to its assigned cluster in comparison to other clusters
+
 $$
 S = \frac{1}{n} \sum_{i=1}^{n} s(i)
 $$
+
 where the silhouette score for each point $s(i)$ is given by
+
 $$
 s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
 $$
+
 $b(i)$ is the minimum distance from a point in cluster $C_i$ to any other cluster $C$, given by
+
 $$
 b(i) = \min_{C \neq C_i} \frac{1}{|C|} \sum_{j \in C} \| \mathbf{x}_i - \mathbf{x}_j \|
 $$
+
 $a(i)$ is the mean distance from a point to all other points in the same cluster, given by
+
 $$
 a(i) = \frac{1}{|C_i| - 1} \sum_{\substack{j \in C_i \\ j \neq i}} \| \mathbf{x}_i - \mathbf{x}_j \|
 $$
+
 Silhouette scores can be implemented disregarding noise entirely, or occasionally by treating noisy points as a separate class.
 
 ## Code Features
