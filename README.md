@@ -26,4 +26,4 @@ The code in this repository has been built and tested using Python 3.9.6. The fo
 - Matplotlib
 - Seaborn
 - Sklearn (used for model comparison, but not creation)
-- Torch (used for loading datasets)
+- PyTorch (used for loading datasets)
